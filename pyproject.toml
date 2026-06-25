@@ -1,0 +1,66 @@
+[project]
+name = "mcp-ckan-datos-uruguay-ben"
+version = "0.2.0"
+description = "Herramientas MCP del Balance Energetico Nacional (BEN/MIEM) del portal de datos abiertos de Uruguay"
+readme = "README.md"
+authors = [
+    { name = "OKFN", email = "info@okfn.org" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "mcp-server @ git+https://github.com/okfn/mcp-server",
+    "pandas>=2.0.0",
+    "requests>=2.34.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.15.0",
+    "pydantic>=2.13,<3.0",
+]
+
+[project.scripts]
+mcp-ckan-datos-uruguay-ben = "mcp_ckan_datos_uruguay_ben:main"
+
+[project.entry-points."mcp_server"]
+mcp-ckan-datos-uruguay-ben = "mcp_ckan_datos_uruguay_ben:register_tools"
+
+[project.urls]
+Homepage = "https://github.com/okfn/mcp-datos-uruguay-ben"
+Repository = "https://github.com/okfn/mcp-datos-uruguay-ben"
+Issues = "https://github.com/okfn/mcp-datos-uruguay-ben/issues"
+
+[build-system]
+requires = ["uv_build>=0.9.10,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# Local-only reference artifacts: the data/ snapshots are fetched live from
+# catalogodatos.gub.uy at runtime, and the PDFs are served as GitHub Release
+# assets and downloaded lazily. Neither ships in the wheel.
+wheel-exclude = [
+    "datasets/BEN/data/**",
+    "resources/*.pdf",
+]
+
+[tool.ruff]
+line-length = 130
+target-version = "py313"
+extend-exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# E/F/W/C90 replace the flake8 + pycodestyle + pyflakes + mccabe defaults.
+# RUF013 catches implicit Optional (`param: int = None`); Pydantic 2.13+
+# rejects null arguments for such parameters at tool-call time.
+select = ["E", "F", "W", "C90", "RUF013"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 16
