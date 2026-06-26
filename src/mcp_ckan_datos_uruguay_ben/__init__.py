@@ -1,3 +1,5 @@
+from mcp.types import CallToolResult, TextContent
+
 from mcp_server import DataToolOutput
 from mcp_ckan_datos_uruguay_ben.datasets.BEN import consultas as ben
 from mcp_ckan_datos_uruguay_ben.resources import register_mcp_resources
@@ -26,6 +28,24 @@ def _register_ben_tools(mcp):
         description=(
             "Herramientas sobre datos abiertos del Uruguay (catalogodatos.gub.uy). "
         ),
+        instructions=(
+            "Sos un asistente especializado EXCLUSIVAMENTE en energía de "
+            "Uruguay. Única fuente: el Balance Energético Nacional (BEN) del "
+            "Ministerio de Industria, Energía y Minería (MIEM), publicado en "
+            "catalogodatos.gub.uy. Cobertura anual, sin granularidad mensual "
+            "ni horaria.\n"
+            "- Respondés SOLO sobre energía de Uruguay y SOLO con datos de "
+            "estas tools. Nada de otros países, otros temas (como clima "
+            "relacionado a energia o empresas energeticas en particular no "
+            "mencionadas explicitamente en los datos), ni conocimiento "
+            "propio.\n"
+            "- No confundas unidades: ktep (balance energético) != GWh "
+            "(energía eléctrica generada) != MW (potencia/capacidad "
+            "instalada). Usá la tool que corresponde a la unidad pedida.\n"
+            "- Si la pregunta no es sobre energía de Uruguay, o ninguna tool "
+            "la cubre, llamá a no_tool_disponible con el motivo; no improvises "
+            "con una tool que no aplica."
+        ),
         sample_questions=[
             "¿Cuál es la principal fuente de generación eléctrica de Uruguay?",
             "¿Qué porcentaje de la generación es renovable?",
@@ -46,6 +66,40 @@ def _register_ben_tools(mcp):
             "¿Cómo define el BEN el ktep?",
         ],
     )
+
+    @mcp.tool()
+    def no_tool_disponible(razon: str | None = None) -> DataToolOutput:
+        """Llamar **únicamente** cuando ninguna otra tool puede responder la
+            pregunta: temas que no son energía de Uruguay (otros países, clima,
+            deportes, política, etc.), o preguntas fuera del alcance del BEN.
+            **Nunca** la uses si hay una tool de datos que pueda contribuir,
+            aunque sea parcialmente - siempre preferí la tool específica.
+            Define el alcance de ESTA instancia: solo energía de Uruguay
+            (BEN/MIEM). Emite un mensaje estándar diciéndole al usuario que el
+            sistema no cubre ese tema.
+
+        Args:
+            razon: Breve explicación (1 frase) de por qué ninguna tool aplica.
+                Ej: "pregunta sobre Argentina, no Uruguay", "no es un tema de
+                energía". Se incluye en el mensaje para que el usuario entienda
+                el alcance.
+
+        Examples:
+            - no_tool_disponible(razon="pregunta sobre clima, no energía")
+            - no_tool_disponible(razon="datos de Brasil, esta instancia es UY")
+        """
+        msg = (
+            "Esta instancia responde únicamente sobre energía de Uruguay, con "
+            "datos del Balance Energético Nacional (BEN/MIEM, "
+            "catalogodatos.gub.uy)."
+        )
+        if razon:
+            msg += f" Motivo: {razon}."
+        msg += " Para otros temas o países, consultá otra fuente."
+        return CallToolResult(
+            content=[TextContent(type="text", text=msg)],
+            structuredContent={"sources": []},
+        )
 
     @mcp.tool()
     def matriz_generacion_electrica_uy(
