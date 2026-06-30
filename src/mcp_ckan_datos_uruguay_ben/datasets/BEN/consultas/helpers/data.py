@@ -24,6 +24,7 @@ DATASET_PAGES = {
     "emisiones_sector":       PORTAL + "miem-emisiones-de-co2-por-sector",
     "generacion":             PORTAL + "miem-generacion-de-electricidad-por-fuente",
     "potencia":               PORTAL + "miem-potencia-instalada-por-fuente",
+    "consumo_residencial":    PORTAL + "ministerio-industra-energia-mineria-ben-consumo-sector-residencial-por-fuente",
 }
 
 # Cada entrada es (dataset_uuid, resource_uuid, filename) - verificada
@@ -79,6 +80,11 @@ _DATASET_PARTS = {
         "a3254965-7f67-4c91-b52d-7c50d2192f40",
         "1306f14e-fdf8-4e26-82c6-7e12319ee0ec",
         "potencia-instalada-por-fuente.csv",
+    ),
+    "consumo_residencial": (
+        "f36babe7-c21e-4ad5-b94e-f525ed393fbe",
+        "a7318ff7-16da-498b-a475-a810e7ace162",
+        "consumo-sector-residencial-por-fuente.csv",
     ),
 }
 
