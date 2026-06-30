@@ -11,11 +11,14 @@ import pandas as pd
 from mcp.types import CallToolResult, TextContent
 
 
-# Notas para la IA: la tabla y el gráfico ya se renderizaron en la UI vía
-# structuredContent, así que no debe re-emitirlos.
+# Notas para la IA: el gráfico y la tabla renderizada ya se mostraron al
+# usuario en pantalla vía structuredContent (la IA NO los recibe por ahí). Los
+# datos crudos de la tabla sí se le adjuntan a la IA como texto (ver
+# `text_result`), para que base su análisis en los números reales.
 ALREADY_TABLE = (
-    "Hemos impreso una tabla con los datos al usuario, no es necesario que "
-    "agregues datos crudos, solo haz tu analisis de los datos"
+    "Al usuario ya se le mostró una tabla renderizada en pantalla con estos "
+    "datos. Más abajo te adjuntamos los mismos datos en texto para que analices "
+    "los números; no copies la tabla de vuelta en tu respuesta, interpretala."
 )
 ALREADY_CHART = (
     "Acabamos de generar y mostrarle un gráfico al usuario. No es necesario "
