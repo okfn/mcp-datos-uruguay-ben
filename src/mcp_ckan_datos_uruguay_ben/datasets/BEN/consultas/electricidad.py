@@ -44,16 +44,15 @@ def matriz_generacion_electrica(anio_desde=None, anio_hasta=None) -> DataToolOut
         f"{anio_ult}" if len(df) == 1
         else f"{int(df['anio'].min())}-{anio_ult}"
     )
-    breakdown_lines, _ = h.mix_breakdown_lines(
-        ult, GENERACION_FUENTES,
-        incluye_pct_renov=RENOVABLES_GEN,
-    )
+    pct_renov = h.pct_renovable(ult, GENERACION_FUENTES, RENOVABLES_GEN)
 
     lines = [
         f"Generación eléctrica de Uruguay, {rango} (GWh por año).",
         "",
-        f"Mix {anio_ult} - TOTAL = {h.fmt_num(ult['TOTAL'])} GWh:",
-    ] + breakdown_lines
+        f"Mix {anio_ult}: TOTAL = {h.fmt_num(ult['TOTAL'])} GWh; "
+        f"renovables = {pct_renov:.1f}% "
+        "(los GWh de cada fuente, año por año, están en la tabla).",
+    ]
     lines.append(h.unit_blurb("GWh"))
     lines.append(h.definiciones_relevantes("clasificacion_por_tipo", "energia_solar"))
     lines.append("")
@@ -141,25 +140,18 @@ def potencia_instalada_por_fuente(anio_desde=None, anio_hasta=None) -> DataToolO
         f"{anio_ult}" if len(df) == 1
         else f"{int(df['anio'].min())}-{anio_ult}"
     )
-    breakdown_lines, _ = h.mix_breakdown_lines(
-        ult, POTENCIA_FUENTES,
-        incluye_pct_renov=RENOVABLES_POT,
-    )
-
-    # Desglose hoja (por tecnología) del último año: expone TCR_F, TCB_F, etc.
-    tech_lines, _ = h.mix_breakdown_lines(ult, POTENCIA_TECNOLOGIAS)
+    pct_renov = h.pct_renovable(ult, POTENCIA_FUENTES, RENOVABLES_POT)
 
     lines = [
         f"Potencia (capacidad) eléctrica instalada en Uruguay, "
         f"{rango} (MW al cierre de cada año).",
         "",
-        f"Mix de capacidad {anio_ult} - TOTAL = {h.fmt_num(ult['TOTAL'])} MW:",
-    ] + breakdown_lines
-    lines.append("")
-    lines.append(f"Desglose por tecnología {anio_ult} (MW):")
-    lines += tech_lines
-    lines.append("")
-    lines.append(POTENCIA_DICC_COLUMNAS)
+        f"Mix de capacidad {anio_ult}: TOTAL = {h.fmt_num(ult['TOTAL'])} MW; "
+        f"renovables = {pct_renov:.1f}% (los MW por fuente y por tecnología, "
+        "año por año, están en la tabla).",
+        "",
+        POTENCIA_DICC_COLUMNAS,
+    ]
     lines.append("")
     lines.append(
         "Nota: capacidad no es generación. La potencia instalada es el máximo "

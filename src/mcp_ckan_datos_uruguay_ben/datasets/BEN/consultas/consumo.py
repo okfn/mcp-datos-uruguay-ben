@@ -49,13 +49,12 @@ def consumo_final_por_sector(anio_desde=None, anio_hasta=None) -> DataToolOutput
         else f"{int(df['anio'].min())}-{anio_ult}"
     )
 
-    breakdown_lines, _ = h.mix_breakdown_lines(ult, CONSUMO_SECTORES)
-
     lines = [
         f"Consumo final energético de Uruguay por sector, {rango} (ktep).",
         "",
-        f"Mix sectorial {anio_ult} - TOTAL = {h.fmt_num(ult['TOTAL'], 1)} ktep:",
-    ] + breakdown_lines
+        f"Mix sectorial {anio_ult}: TOTAL = {h.fmt_num(ult['TOTAL'], 1)} ktep "
+        "(el consumo de cada sector, año por año, está en la tabla).",
+    ]
 
     if len(df) >= 2:
         prim = df.iloc[0]
@@ -141,16 +140,15 @@ def consumo_final_por_fuente(anio_desde=None, anio_hasta=None) -> DataToolOutput
         else f"{int(df['anio'].min())}-{anio_ult}"
     )
 
-    breakdown_lines, _ = h.mix_breakdown_lines(
-        ult, CONSUMO_FUENTES,
-        incluye_pct_renov=RENOVABLES_CONSUMO,
-    )
+    pct_renov = h.pct_renovable(ult, CONSUMO_FUENTES, RENOVABLES_CONSUMO)
 
     lines = [
         f"Consumo final energético de Uruguay por fuente, {rango} (ktep).",
         "",
-        f"Mix por fuente {anio_ult} - TOTAL = {h.fmt_num(ult['TOTAL'], 1)} ktep:",
-    ] + breakdown_lines
+        f"Mix por fuente {anio_ult}: TOTAL = {h.fmt_num(ult['TOTAL'], 1)} ktep; "
+        f"renovables = {pct_renov:.1f}% "
+        "(el consumo de cada fuente, año por año, está en la tabla).",
+    ]
     lines.append("")
     lines.append(
         "El % renovable considera leña/carbón vegetal, residuos de biomasa, "
