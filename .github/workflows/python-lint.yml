@@ -1,4 +1,4 @@
-name: Lint
+name: Lint and test
 
 on:
   push:
@@ -29,3 +29,8 @@ jobs:
     - name: Run ruff
       # Rule selection lives in pyproject.toml ([tool.ruff.lint] select).
       run: uv run ruff check src
+
+    - name: Run tests
+      # Los tests corren offline (cachean datasets sintéticos vía conftest),
+      # garantizan que las tools embeben los datos crudos en la respuesta a la IA.
+      run: uv run pytest
