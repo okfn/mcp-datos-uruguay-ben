@@ -55,6 +55,24 @@ COLORES_BEN = {
     # 'Fósil' (generacion/potencia electrica) usa el color 'No renovable'
     "Fósil": ben_color(_OFERTA, "No renovable"),
 
+    # --- Fuentes del consumo residencial (consumo_hogares) ----------------
+    "Leña": ben_color(_FUENTES, "Leña"),
+    "Carbón vegetal": ben_color(_FUENTES, "Carbón vegetal"),
+    "Supergás (GLP)": ben_color(_FUENTES, "GLP"),
+    "Queroseno": ben_color(_FUENTES, "Queroseno"),
+    "Gasolina automotora": ben_color(_FUENTES, "Gasolina automotora"),
+    "Gasoil": ben_color(_FUENTES, "Gasoil"),
+    "Fueloil": ben_color(_FUENTES, "Fueloil"),
+    "Diéseloil": ben_color(_FUENTES, "Gasoil"),
+    "Gas manufacturado": ben_color(_FUENTES, "Gas manufacturado"),
+    "Bioetanol": ben_color(_FUENTES, "Bioetanol"),
+    "Biodiésel": ben_color(_FUENTES, "Biodiésel"),
+    # Clasificación renovable/no renovable del hogar (renovables_residencial)
+    "Renovable": ben_color(_OFERTA, "Renovable"),
+    "No renovable": ben_color(_OFERTA, "No renovable"),
+    "Renovables directas": ben_color(_FUENTES, "Biomasa"),
+    "Electricidad renovable": ben_color(_FUENTES, "Electricidad"),
+
     # --- Sectores de consumo / emisiones (hoja Sectores y categ INGEI)
     "Industrial": ben_color(_SECTORES, "Industrial"),
     "Transporte": ben_color(_SECTORES, "Transporte"),
