@@ -17,7 +17,11 @@ def register_resources(mcp):
     register_mcp_resources(mcp)
 
 
-def _register_ben_tools(mcp):
+def _register_ben_tools(mcp):  # noqa: C901
+    # C901 (complejidad): es una función de *wiring* que registra las tools en
+    # secuencia (un `@mcp.tool` por dataset/consulta); la complejidad
+    # ciclomática crece con cada tool pero no hay ramificación real que
+    # simplificar. Se silencia a propósito.
     """BEN - Balance Energético Nacional (MIEM).
 
     Fuente: catalogodatos.gub.uy. Datos anuales desde 1965 (la serie de
@@ -61,6 +65,13 @@ def _register_ben_tools(mcp):
             "¿Uruguay importa o exporta electricidad?",
             "¿Cómo evolucionó la posición exportadora del país?",
             "¿En qué años fue exportador / importador neto?",
+            "¿Qué energía usan los hogares uruguayos?",
+            "¿Cuánto pesa la leña en el consumo de los hogares?",
+            "¿Se electrificaron los hogares? ¿Cuándo superó la electricidad a la leña?",
+            "¿Aumenta o baja el consumo de energía de los hogares?",
+            "¿Cuándo dejó de usarse el queroseno en los hogares?",
+            "¿Qué tan renovable es la energía que usan los hogares?",
+            "¿Cómo se calcula el % renovable del consumo de los hogares?",
             "¿Qué significa 'energía final' en el BEN?",
             "¿Qué incluye 'residuos de biomasa'?",
             "¿Cómo define el BEN el ktep?",
