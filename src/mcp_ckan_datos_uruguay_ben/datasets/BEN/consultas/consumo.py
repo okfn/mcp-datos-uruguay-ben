@@ -220,7 +220,7 @@ def tendencia_demanda_total(anio_desde=None, anio_hasta=None) -> DataToolOutput:
         if len(ult_n) >= 2:
             x0 = float(ult_n.iloc[0]["TOTAL"])
             x1 = float(ult_n.iloc[-1]["TOTAL"])
-            tendencia = "↑ creciendo" if x1 > x0 else "↓ contrayéndose" if x1 < x0 else "↔ estable"
+            tendencia = " creciendo" if x1 > x0 else " contrayéndose" if x1 < x0 else "<-> estable"
             lines.append(
                 f"  - Últimos {len(ult_n)} años: {tendencia} "
                 f"({(x1 / x0 - 1) * 100:+.1f}% en el período)."

@@ -161,7 +161,7 @@ def dependencia_energetica_externa(anio_desde=None, anio_hasta=None) -> DataTool
         delta = ult["pct_importado"] - prim["pct_importado"]
         tendencia = (
             "↓ menos dependiente" if delta < -1 else
-            "↑ más dependiente" if delta > 1 else "↔ estable"
+            "↑ más dependiente" if delta > 1 else "<-> estable"
         )
         lines.append(
             f"  - {int(prim['anio'])}: {prim['pct_importado']:.1f}% importado "

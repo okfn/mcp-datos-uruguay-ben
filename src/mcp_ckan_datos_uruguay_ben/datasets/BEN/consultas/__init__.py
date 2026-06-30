@@ -24,6 +24,14 @@ from .consumo import (
     consumo_final_por_fuente,
     tendencia_demanda_total,
 )
+from .consumo_hogares import (
+    consumo_residencial_por_fuente,
+    tendencia_consumo_residencial,
+    electrificacion_hogares,
+    fuente_residencial_detalle,
+    renovables_residencial,
+    renovable_residencial_calculo,
+)
 from .abastecimiento import (
     matriz_abastecimiento_primario,
     dependencia_energetica_externa,
@@ -47,6 +55,12 @@ __all__ = [
     "consumo_final_por_sector",
     "consumo_final_por_fuente",
     "tendencia_demanda_total",
+    "consumo_residencial_por_fuente",
+    "tendencia_consumo_residencial",
+    "electrificacion_hogares",
+    "fuente_residencial_detalle",
+    "renovables_residencial",
+    "renovable_residencial_calculo",
     "matriz_abastecimiento_primario",
     "dependencia_energetica_externa",
     "perdidas_transformacion",
