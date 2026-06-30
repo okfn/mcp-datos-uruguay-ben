@@ -41,7 +41,7 @@ from .format import (
     fmt_num,
     text_result,
     empty_result,
-    mix_breakdown_lines,
+    pct_renovable,
     build_table,
 )
 from .metodologia import (
@@ -63,7 +63,8 @@ __all__ = [
     "BEN_PALETTE", "COLORES_BEN", "ben_color",
     # format
     "ALREADY_TABLE", "ALREADY_CHART", "SOURCE_FOOTER", "fmt_num",
-    "text_result", "empty_result", "mix_breakdown_lines", "build_table",
+    "text_result", "empty_result", "pct_renovable",
+    "build_table",
     # metodologia
     "DEFINICIONES_BEN", "CONCEPTOS_DISPONIBLES", "definiciones_relevantes",
 ]

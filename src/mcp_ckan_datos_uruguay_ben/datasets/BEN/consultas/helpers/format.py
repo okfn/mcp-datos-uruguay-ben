@@ -2,9 +2,10 @@
 Formateo de números, builders de `CallToolResult`, tablas y mensajes fijos.
 
 `fmt_num`, `text_result`/`empty_result` (arman el `CallToolResult` con su
-`structuredContent`), `mix_breakdown_lines` y `build_table` para el texto y la
-tabla de cada respuesta, más las notas fijas `ALREADY_TABLE`/`ALREADY_CHART` y
-el `SOURCE_FOOTER`.
+`structuredContent` y, además, embeben la tabla como texto para que la IA vea
+los datos crudos), `pct_renovable` y `build_table` para el texto y la tabla de
+cada respuesta, más las notas fijas `ALREADY_TABLE`/`ALREADY_CHART` y el
+`SOURCE_FOOTER`.
 """
 
 import pandas as pd
@@ -97,27 +98,21 @@ def empty_result(label, sources):
     )
 
 
-def mix_breakdown_lines(row, fuentes, total_col="TOTAL", incluye_pct_renov=None):
-    """Genera las líneas '  - Hidráulica:    7,331 GWh  (42.6%)' para
-    el último año / año único. Devuelve (lines, valores) donde valores
-    es una list[(etiqueta, valor, pct)] útil para % renovables.
+def pct_renovable(row, fuentes, renovables, total_col="TOTAL"):
+    """% renovable de una fila: suma de las `fuentes` cuya etiqueta está en
+    `renovables`, sobre el total. Devuelve None si el total es 0/NaN.
 
-    `incluye_pct_renov`: si se pasa una list de etiquetas consideradas
-    renovables, agrega una línea con el % renovable.
-    """
+    Se expone como helper para que las tools den el % renovable como dato de
+    análisis (no está en la tabla cruda) sin reimprimir el desglose por fuente,
+    que ya va completo en la tabla embebida por `text_result`."""
     total = float(row[total_col]) if pd.notna(row[total_col]) else 0.0
-    valores = []
-    lines = []
-    for col, etiqueta in fuentes:
-        v = float(row[col]) if pd.notna(row[col]) else 0.0
-        pct = (v / total * 100) if total else 0.0
-        valores.append((etiqueta, v, pct))
-        lines.append(f"  - {etiqueta:<14}: {fmt_num(v):>10}  ({pct:>5.1f}%)")
-    if incluye_pct_renov is not None:
-        renov = sum(v for et, v, _ in valores if et in incluye_pct_renov)
-        pct_renov = (renov / total * 100) if total else 0.0
-        lines.append(f"  → Renovables: {pct_renov:.1f}%")
-    return lines, valores
+    if not total:
+        return None
+    renov = sum(
+        float(row[col]) for col, et in fuentes
+        if et in renovables and pd.notna(row[col])
+    )
+    return renov / total * 100
 
 
 def build_table(df, fuentes, total_col="TOTAL", extra_cols=None):
