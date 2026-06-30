@@ -56,11 +56,6 @@ def matriz_abastecimiento_primario(anio_desde=None, anio_hasta=None) -> DataTool
         else f"{int(df['anio'].min())}-{anio_ult}"
     )
 
-    breakdown_lines, _ = h.mix_breakdown_lines(
-        ult, ABAST_FUENTES,
-        incluye_pct_renov=RENOVABLES_ABAST,
-    )
-
     # Diversificación: índice de Herfindahl-Hirschman normalizado (0=100%
     # concentrado en 1 fuente, 1=todas iguales). HHI = Σ(share²); HHI* = (1-HHI)/(1-1/n).
     total = float(ult["TOTAL"])
@@ -75,12 +70,11 @@ def matriz_abastecimiento_primario(anio_desde=None, anio_hasta=None) -> DataTool
     lines = [
         f"Oferta primaria de energía de Uruguay, {rango} (ktep).",
         "",
-        f"Mix primario {anio_ult} - TOTAL = {h.fmt_num(ult['TOTAL'], 1)} ktep:",
-    ] + breakdown_lines
-    lines.append(
+        f"Mix primario {anio_ult}: TOTAL = {h.fmt_num(ult['TOTAL'], 1)} ktep "
+        "(la oferta de cada fuente, año por año, está en la tabla).",
         f"  → Diversificación (Herfindahl normalizado): {diversidad:.2f} "
-        f"(0 = monofuente, 1 = mix perfectamente repartido)."
-    )
+        f"(0 = monofuente, 1 = mix perfectamente repartido).",
+    ]
 
     if len(df) >= 2:
         prim = df.iloc[0]
@@ -167,7 +161,7 @@ def dependencia_energetica_externa(anio_desde=None, anio_hasta=None) -> DataTool
         delta = ult["pct_importado"] - prim["pct_importado"]
         tendencia = (
             "↓ menos dependiente" if delta < -1 else
-            "↑ más dependiente" if delta > 1 else "↔ estable"
+            "↑ más dependiente" if delta > 1 else "<-> estable"
         )
         lines.append(
             f"  - {int(prim['anio'])}: {prim['pct_importado']:.1f}% importado "

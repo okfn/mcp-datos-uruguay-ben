@@ -2,20 +2,24 @@
 Formateo de números, builders de `CallToolResult`, tablas y mensajes fijos.
 
 `fmt_num`, `text_result`/`empty_result` (arman el `CallToolResult` con su
-`structuredContent`), `mix_breakdown_lines` y `build_table` para el texto y la
-tabla de cada respuesta, más las notas fijas `ALREADY_TABLE`/`ALREADY_CHART` y
-el `SOURCE_FOOTER`.
+`structuredContent` y, además, embeben la tabla como texto para que la IA vea
+los datos crudos), `pct_renovable` y `build_table` para el texto y la tabla de
+cada respuesta, más las notas fijas `ALREADY_TABLE`/`ALREADY_CHART` y el
+`SOURCE_FOOTER`.
 """
 
 import pandas as pd
 from mcp.types import CallToolResult, TextContent
 
 
-# Notas para la IA: la tabla y el gráfico ya se renderizaron en la UI vía
-# structuredContent, así que no debe re-emitirlos.
+# Notas para la IA: el gráfico y la tabla renderizada ya se mostraron al
+# usuario en pantalla vía structuredContent (la IA NO los recibe por ahí). Los
+# datos crudos de la tabla sí se le adjuntan a la IA como texto (ver
+# `text_result`), para que base su análisis en los números reales.
 ALREADY_TABLE = (
-    "Hemos impreso una tabla con los datos al usuario, no es necesario que "
-    "agregues datos crudos, solo haz tu analisis de los datos"
+    "Al usuario ya se le mostró una tabla renderizada en pantalla con estos "
+    "datos. Más abajo te adjuntamos los mismos datos en texto para que analices "
+    "los números; no copies la tabla de vuelta en tu respuesta, interpretala."
 )
 ALREADY_CHART = (
     "Acabamos de generar y mostrarle un gráfico al usuario. No es necesario "
@@ -53,15 +57,33 @@ def fmt_num(v, dec=0):
     return f"{float(v):,.{dec}f}"
 
 
+def _table_to_text(table):
+    """Renderiza la tabla (lista de filas) como bloque delimitado por ' | '.
+
+    La tabla de `structuredContent` la renderiza la UI para el USUARIO; la IA
+    NO la recibe por ese canal. Este texto es la copia que sí ve la IA, para
+    que sus conclusiones se apoyen en TODOS los números, no sólo en el resumen.
+    """
+    if not table:
+        return ""
+    return "\n".join(" | ".join(str(c) for c in row) for row in table)
+
+
 def text_result(text, sources, table=None, charts=None):
     sc = {"sources": sources}
     if table:
         sc["table"] = table
     if charts:
         sc["charts"] = charts
-    text = f"{text}\n\n{SIN_ESPECULAR}"
+    body = text
+    if table:
+        body += (
+            "\n\n=== Datos completos (para tu análisis) ===\n"
+            + _table_to_text(table)
+        )
+    body = f"{body}\n\n{SIN_ESPECULAR}"
     return CallToolResult(
-        content=[TextContent(type="text", text=text)],
+        content=[TextContent(type="text", text=body)],
         structuredContent=sc,
     )
 
@@ -76,27 +98,21 @@ def empty_result(label, sources):
     )
 
 
-def mix_breakdown_lines(row, fuentes, total_col="TOTAL", incluye_pct_renov=None):
-    """Genera las líneas '  - Hidráulica:    7,331 GWh  (42.6%)' para
-    el último año / año único. Devuelve (lines, valores) donde valores
-    es una list[(etiqueta, valor, pct)] útil para % renovables.
+def pct_renovable(row, fuentes, renovables, total_col="TOTAL"):
+    """% renovable de una fila: suma de las `fuentes` cuya etiqueta está en
+    `renovables`, sobre el total. Devuelve None si el total es 0/NaN.
 
-    `incluye_pct_renov`: si se pasa una list de etiquetas consideradas
-    renovables, agrega una línea con el % renovable.
-    """
+    Se expone como helper para que las tools den el % renovable como dato de
+    análisis (no está en la tabla cruda) sin reimprimir el desglose por fuente,
+    que ya va completo en la tabla embebida por `text_result`."""
     total = float(row[total_col]) if pd.notna(row[total_col]) else 0.0
-    valores = []
-    lines = []
-    for col, etiqueta in fuentes:
-        v = float(row[col]) if pd.notna(row[col]) else 0.0
-        pct = (v / total * 100) if total else 0.0
-        valores.append((etiqueta, v, pct))
-        lines.append(f"  - {etiqueta:<14}: {fmt_num(v):>10}  ({pct:>5.1f}%)")
-    if incluye_pct_renov is not None:
-        renov = sum(v for et, v, _ in valores if et in incluye_pct_renov)
-        pct_renov = (renov / total * 100) if total else 0.0
-        lines.append(f"  → Renovables: {pct_renov:.1f}%")
-    return lines, valores
+    if not total:
+        return None
+    renov = sum(
+        float(row[col]) for col, et in fuentes
+        if et in renovables and pd.notna(row[col])
+    )
+    return renov / total * 100
 
 
 def build_table(df, fuentes, total_col="TOTAL", extra_cols=None):

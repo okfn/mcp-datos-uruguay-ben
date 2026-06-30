@@ -24,6 +24,7 @@ DATASET_PAGES = {
     "emisiones_sector":       PORTAL + "miem-emisiones-de-co2-por-sector",
     "generacion":             PORTAL + "miem-generacion-de-electricidad-por-fuente",
     "potencia":               PORTAL + "miem-potencia-instalada-por-fuente",
+    "consumo_residencial":    PORTAL + "ministerio-industra-energia-mineria-ben-consumo-sector-residencial-por-fuente",
 }
 
 # Cada entrada es (dataset_uuid, resource_uuid, filename) - verificada
@@ -80,6 +81,11 @@ _DATASET_PARTS = {
         "1306f14e-fdf8-4e26-82c6-7e12319ee0ec",
         "potencia-instalada-por-fuente.csv",
     ),
+    "consumo_residencial": (
+        "f36babe7-c21e-4ad5-b94e-f525ed393fbe",
+        "a7318ff7-16da-498b-a475-a810e7ace162",
+        "consumo-sector-residencial-por-fuente.csv",
+    ),
 }
 
 DATASET_URLS = {
@@ -87,11 +93,23 @@ DATASET_URLS = {
     for key, (ds, rs, fn) in _DATASET_PARTS.items()
 }
 
+# Opciones de parseo por dataset. Casi todos los CSV del MIEM vienen en
+# ISO-8859-1 con separador ';' y punto decimal (`_DEFAULT_READ_OPTS`). El
+# dataset residencial, publicado más tarde, viene en UTF-8 con separador ','
+# y **coma decimal** ("296,5" = 296.5), así que necesita su propia entrada.
+_DEFAULT_READ_OPTS = {"sep": ";", "encoding": "latin-1"}
+_DATASET_READ_OPTS = {
+    "consumo_residencial": {"sep": ",", "encoding": "utf-8", "decimal": ","},
+}
+
 _caches = {}
 
 
 def load_dataset(key):
-    """Lee el CSV remoto del MIEM (encoding latin-1, sep ';'). Cachea por key.
+    """Lee el CSV remoto del MIEM y lo cachea por key.
+
+    El formato de parseo (separador, encoding, decimal) sale de
+    `_DATASET_READ_OPTS` (default: latin-1 / ';' / punto decimal).
 
     Renombra `AÑO` → `anio` y la castea a int para que las tools puedan
     filtrar con confianza.
@@ -99,6 +117,7 @@ def load_dataset(key):
     if key in _caches:
         return _caches[key]
     url = DATASET_URLS[key]
+    opts = _DATASET_READ_OPTS.get(key, _DEFAULT_READ_OPTS)
 
     # El 09 de Junio, el catálogo se desplegó con un Self-Signed certificate y
     # las llamadas programáticas ya no funcionan. Como controlamos las URLs que
@@ -106,7 +125,10 @@ def load_dataset(key):
     # TODO: Hablar con el equipo de infraestructura y revisar este fix que ponemos
     # para poder desplegar en el entorno de pruebas.
     response = requests.get(url, verify=False)
-    df = pd.read_csv(io.StringIO(response.text), sep=";", encoding="latin-1")
+    # Forzamos el encoding: sin charset en la cabecera, requests asume
+    # ISO-8859-1 y rompería los acentos del dataset residencial (UTF-8).
+    response.encoding = opts["encoding"]
+    df = pd.read_csv(io.StringIO(response.text), **opts)
     if "AÑO" in df.columns:
         df = df.rename(columns={"AÑO": "anio"})
     df["anio"] = df["anio"].astype(int)

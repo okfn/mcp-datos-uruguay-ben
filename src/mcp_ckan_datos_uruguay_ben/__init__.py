@@ -17,7 +17,11 @@ def register_resources(mcp):
     register_mcp_resources(mcp)
 
 
-def _register_ben_tools(mcp):
+def _register_ben_tools(mcp):  # noqa: C901
+    # C901 (complejidad): es una función de *wiring* que registra las tools en
+    # secuencia (un `@mcp.tool` por dataset/consulta); la complejidad
+    # ciclomática crece con cada tool pero no hay ramificación real que
+    # simplificar. Se silencia a propósito.
     """BEN - Balance Energético Nacional (MIEM).
 
     Fuente: catalogodatos.gub.uy. Datos anuales desde 1965 (la serie de
@@ -61,6 +65,13 @@ def _register_ben_tools(mcp):
             "¿Uruguay importa o exporta electricidad?",
             "¿Cómo evolucionó la posición exportadora del país?",
             "¿En qué años fue exportador / importador neto?",
+            "¿Qué energía usan los hogares uruguayos?",
+            "¿Cuánto pesa la leña en el consumo de los hogares?",
+            "¿Se electrificaron los hogares? ¿Cuándo superó la electricidad a la leña?",
+            "¿Aumenta o baja el consumo de energía de los hogares?",
+            "¿Cuándo dejó de usarse el queroseno en los hogares?",
+            "¿Qué tan renovable es la energía que usan los hogares?",
+            "¿Cómo se calcula el % renovable del consumo de los hogares?",
             "¿Qué significa 'energía final' en el BEN?",
             "¿Qué incluye 'residuos de biomasa'?",
             "¿Cómo define el BEN el ktep?",
@@ -305,6 +316,218 @@ def _register_ben_tools(mcp):
         )
 
     @mcp.tool()
+    def consumo_residencial_por_fuente_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """Consumo de energía del SECTOR RESIDENCIAL (hogares) de Uruguay,
+            abierto fuente por fuente, en ktep.
+            Mientras `consumo_energetico_por_fuente_uy` agrupa las fuentes para
+            todo el país, esta tool las muestra **una por una sólo para los
+            hogares**: electricidad, leña, supergás (GLP), gas natural,
+            residuos de biomasa, solar térmica, queroseno, gasoil, carbón
+            vegetal, etc.
+            Útil para:
+                - ¿Qué energía usan los hogares uruguayos hoy?
+                - ¿Cuánto pesa la leña / el supergás / la electricidad en el hogar?
+                - ¿Qué porcentaje del consumo del hogar es renovable?
+                - ¿Cómo cambió el mix energético residencial desde 1965?
+            El TOTAL coincide con la columna 'Residencial' de
+            `consumo_energetico_por_sector_uy` (misma magnitud, otra apertura).
+            Cobertura: 1965-2024 (anual). Pie chart si se pide 1 año, stacked
+            bar si se piden varios. Devuelve mix del último año + % renovable,
+            tabla año-por-año y gráfico. **ktep ≈ 11.63 GWh.**
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año
+                disponible (típicamente 2024).
+
+        Examples:
+            - consumo_residencial_por_fuente_uy()
+            - consumo_residencial_por_fuente_uy(anio_desde=2024, anio_hasta=2024)
+            - consumo_residencial_por_fuente_uy(anio_desde=2000)
+        """
+        return ben.consumo_residencial_por_fuente(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def tendencia_consumo_residencial_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """Evolución del consumo energético TOTAL del sector residencial
+            (hogares) de Uruguay, en ktep/año.
+            Vista macro del hogar: ¿los hogares consumen más o menos energía
+            que antes? ¿cuánto creció en los últimos años? ¿cuál es el total
+            del último año?
+            Útil para:
+                - ¿Cuánta energía consumen los hogares de Uruguay?
+                - ¿Aumenta o baja el consumo residencial?
+                - ¿Cómo evolucionó desde 1965 / en la última década?
+            Devuelve serie de tiempo (gráfico de líneas) del TOTAL del hogar.
+            Cobertura: 1965-2024 (anual).
+            **No** computa per-cápita ni por hogar: BEN no incluye población
+            ni cantidad de hogares; cruzar con INE para esas métricas.
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - tendencia_consumo_residencial_uy()
+            - tendencia_consumo_residencial_uy(anio_desde=2000)
+            - tendencia_consumo_residencial_uy(anio_desde=2020)
+        """
+        return ben.tendencia_consumo_residencial(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def electrificacion_hogares_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """Participación (%) de cada fuente en el consumo del hogar uruguayo a
+            lo largo del tiempo, con foco en la **electrificación** y el cruce
+            histórico leña <-> electricidad.
+            A diferencia de `consumo_residencial_por_fuente_uy` (que da ktep
+            absolutos), esta tool entrega **porcentajes del total de cada año**,
+            ideal para contar la transición del hogar.
+            Útil para:
+                - ¿Se electrificaron los hogares uruguayos?
+                - ¿En qué año la electricidad superó a la leña en el hogar?
+                - ¿Cómo perdió peso el queroseno / ganó peso el supergás?
+                - ¿Qué participación tiene la solar térmica en el hogar?
+            Devuelve un gráfico de líneas con la participación (%) de las
+            principales fuentes del hogar año a año.
+            Cobertura: 1965-2024 (anual). Los valores son % del total del año,
+            no ktep (para absolutos usar `consumo_residencial_por_fuente_uy`).
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - electrificacion_hogares_uy()
+            - electrificacion_hogares_uy(anio_desde=1990)
+            - electrificacion_hogares_uy(anio_desde=2000, anio_hasta=2024)
+        """
+        return ben.electrificacion_hogares(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def fuente_residencial_detalle_uy(
+        fuente: str,
+        anio_desde: int | None = None,
+        anio_hasta: int | None = None,
+    ) -> DataToolOutput:
+        """Serie histórica de UNA fuente puntual en el consumo del hogar
+            uruguayo, en ktep (drill-down para análisis fino).
+            Devuelve la evolución de esa fuente, su participación en el total
+            del hogar, su año pico, su primer año con dato y su crecimiento
+            anual compuesto.
+            Útil para:
+                - ¿Cómo evolucionó el uso de leña / supergás / electricidad
+                  en los hogares?
+                - ¿Cuándo dejó de usarse el queroseno en el hogar?
+                - ¿Cuándo apareció la solar térmica / la biomasa moderna?
+                - ¿En qué año fue máximo el consumo de una fuente?
+            Cobertura: 1965-2024 (anual). Devuelve gráfico de líneas de la
+            fuente elegida.
+
+        Args:
+            fuente: Código de la fuente a analizar. Opciones (código = fuente):
+                EE = electricidad, L = leña, GLP = supergás/propano,
+                GN = gas natural, RB = residuos de biomasa (pellets, etc.),
+                S = solar térmica, Go = gasoil, CV = carbón vegetal,
+                Q = queroseno, Ga = gasolina automotora, Fo = fueloil,
+                Be = bioetanol, Do = diéseloil, GM = gas manufacturado,
+                Bd = biodiésel. Acepta también el nombre (ej. "supergas",
+                "leña", "solar").
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - fuente_residencial_detalle_uy(fuente="EE")
+            - fuente_residencial_detalle_uy(fuente="L", anio_desde=1990)
+            - fuente_residencial_detalle_uy(fuente="GLP")
+        """
+        return ben.fuente_residencial_detalle(
+            fuente=fuente, anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def renovables_residencial_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """% renovable del consumo energético del hogar uruguayo según el
+            criterio del **Indicador ODS 7.2.1 del BEN** ('Proporción de la
+            energía renovable en el consumo final total de energía'), año a año.
+            A diferencia de un conteo de 'renovables directas', este criterio
+            **cuenta también la parte renovable de la electricidad**: como la
+            matriz del SIN es casi totalmente renovable, electrificar el hogar
+            sube el indicador. La electricidad se reparte en su fracción
+            renovable y fósil según el mix de generación del SIN de cada año,
+            por lo que la serie arranca en **2002** (primer año con mix del SIN).
+            Útil para:
+                - ¿Qué tan renovable es la energía que usan los hogares?
+                - ¿Cómo evolucionó el % renovable del consumo residencial?
+                - ¿Cuánto aporta la electricidad limpia al renovable del hogar?
+            El 64% que publica el BEN para 2024 es el indicador NACIONAL (todos
+            los sectores); esta tool da el del sector residencial, más alto por
+            el peso de la electricidad y la leña.
+            Cobertura: 2002-2024 (anual). Devuelve gráfico de barras apiladas
+            (renovable vs no renovable) por año. **ktep ≈ 11.63 GWh.**
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default y mínimo:
+                2002 (años anteriores se recortan: sin mix del SIN no se puede
+                aplicar el criterio 7.2.1).
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - renovables_residencial_uy()
+            - renovables_residencial_uy(anio_desde=2013)
+            - renovables_residencial_uy(anio_desde=2024, anio_hasta=2024)
+        """
+        return ben.renovables_residencial(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def renovable_residencial_calculo_uy(anio: int | None = None) -> DataToolOutput:
+        """% renovable del consumo del hogar uruguayo para UN año, mostrando el
+            **cálculo paso a paso** a partir de los dos datasets que lo
+            alimentan (consumo residencial por fuente + generación eléctrica
+            del SIN). Es la versión auditable/explicativa de
+            `renovables_residencial_uy`: en vez de una serie, desglosa un único
+            año para que se vea de dónde sale el número.
+            Muestra: (1) las renovables directas del hogar fuente por fuente,
+            (2) la fracción renovable del SIN ese año (GWh renovables / GWh
+            totales), (3) la electricidad renovable del hogar (electricidad x
+            esa fracción), (4) el % renovable final, y la comparación con el
+            renovable "sólo directo" (sin electricidad).
+            Útil para:
+                - ¿Cómo se calcula el % renovable del hogar?
+                - ¿Por qué da X% y no el 64% nacional?
+                - ¿Cuánto del renovable del hogar es leña y cuánto electricidad?
+            Para años anteriores a 2002 (sin mix del SIN) sólo puede informar el
+            renovable directo y lo aclara. Devuelve un pie chart con la
+            composición renovable directa / electricidad renovable / no
+            renovable del año.
+
+        Args:
+            anio: Año a desglosar. Default: último año disponible (2024). El
+                criterio completo (con electricidad) requiere año >= 2002.
+
+        Examples:
+            - renovable_residencial_calculo_uy()
+            - renovable_residencial_calculo_uy(anio=2024)
+            - renovable_residencial_calculo_uy(anio=2010)
+        """
+        return ben.renovable_residencial_calculo(anio=anio)
+
+    @mcp.tool()
     def matriz_energetica_primaria_uy(
         anio_desde: int | None = None, anio_hasta: int | None = None
     ) -> DataToolOutput:
@@ -546,7 +769,7 @@ def _register_ben_tools(mcp):
                 carbon_mineral, gas_natural, energia_solar, residuos_de_biomasa,
                 biomasa_para_biocombustibles, residuos_industriales, ktep,
                 emisiones_co2, matriz_primaria, clasificacion_por_origen,
-                clasificacion_por_tipo.
+                clasificacion_por_tipo, renovable_consumo_final.
 
         Examples:
             - glosario_ben(concepto="energia_final")

@@ -1,5 +1,7 @@
 # MCP datos Uruguay - BEN
 
+[![Lint and test](https://github.com/okfn/mcp-datos-uruguay-ben/actions/workflows/python-lint.yml/badge.svg)](https://github.com/okfn/mcp-datos-uruguay-ben/actions/workflows/python-lint.yml)
+
 Herramientas MCP sobre el **Balance Energetico Nacional (BEN)** de Uruguay,
 publicado por el Ministerio de Industria, Energia y Mineria (MIEM) en el
 [portal de datos abiertos](https://catalogodatos.gub.uy/).

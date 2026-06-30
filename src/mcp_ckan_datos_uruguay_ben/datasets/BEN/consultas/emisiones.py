@@ -42,15 +42,13 @@ def emisiones_co2_por_sector(anio_desde=None, anio_hasta=None) -> DataToolOutput
         else f"{int(df['anio'].min())}-{anio_ult}"
     )
 
-    breakdown_lines, _ = h.mix_breakdown_lines(ult, EMISIONES_SECTORES)
-
     lines = [
         f"Emisiones de CO2 por sector en Uruguay, {rango} (Gg CO2 = "
         f"kilotoneladas).",
         "",
-        f"Mix sectorial {anio_ult} - TOTAL = {h.fmt_num(ult['TOTAL'], 1)} "
-        f"Gg CO2:",
-    ] + breakdown_lines
+        f"Mix sectorial {anio_ult}: TOTAL = {h.fmt_num(ult['TOTAL'], 1)} "
+        "Gg CO2 (las emisiones de cada sector, año por año, están en la tabla).",
+    ]
 
     if len(df) >= 2:
         prim = df.iloc[0]

@@ -2,11 +2,8 @@
 Definiciones oficiales del Libro del Balance Energético Nacional (MIEM).
 
 Fuente única de verdad para la metodología del BEN. El texto de cada
-definición es **literal** del capítulo "8. Metodología" del Libro del BEN 2024
-(`resources/ben/libro-2024/text/08-metodologia.txt`): se unieron las líneas
-cortadas por el salto de página del PDF y se quitaron los marcadores de viñeta,
-pero no se reinterpretó ni se resumió el contenido. La sección (`§8.x`) de cada
-entrada permite rastrear la cita en el libro.
+definición es **literal** del Libro del BEN 2024 (Uruguay-BEN-libro-2024.pdf).
+La mayoría de las entradas son del capítulo "8. Metodología".
 
 `definiciones_relevantes(*conceptos)` arma el bloque de texto que las tools de
 datos del BEN concatenan a su respuesta (igual que `units.unit_blurb`), para que
@@ -322,6 +319,34 @@ DEFINICIONES_BEN = {
             "matriz_generacion_electrica_uy",
             "potencia_instalada_electrica_uy",
         ],
+    },
+
+    # ── Cap. 7 (ODS 7) - Indicador 7.2.1: renovables en el consumo final ──
+    "renovable_consumo_final": {
+        "termino": "Proporción de energía renovable en el consumo final (Indicador ODS 7.2.1)",
+        "definicion": (
+            "Proporción de la energía renovable en el consumo final total de "
+            "energía. Uruguay ha venido trabajando en la descarbonización de "
+            "la matriz energética desde hace más de una década (Política "
+            "Energética 2005-2030), con políticas y acuerdos multipartidarios "
+            "que han permitido logros sumamente significativos como la "
+            "descarbonización prácticamente total de la matriz de generación "
+            "eléctrica. En lo que refiere al consumo final todavía queda un "
+            "largo camino por recorrer y sin dudas será más complejo y "
+            "costoso. Pero contar con una matriz eléctrica de muy bajo "
+            "contenido en emisiones de GEI permite avanzar hacia la "
+            "electrificación de usos finales, dado que la matriz de generación "
+            "eléctrica ya es limpia. En 2024 Uruguay alcanzó el 64% de usos de "
+            "fuentes renovables en la matriz de consumo final. Si se analiza la "
+            "evolución de dicho indicador se observa la incidencia de la "
+            "política energética, cuya implementación comenzó a verse reflejada "
+            "a partir de 2013, cuando se superó el 50% de la participación de "
+            "fuentes renovables en la matriz de consumo final. Este valor de "
+            "referencia no solo se mantuvo sino que continuó creciendo y fue de "
+            "60%, en promedio, en la última década."
+        ),
+        "seccion": "§7.2 (Indicador 7.2.1)",
+        "tools": ["renovables_residencial_uy"],
     },
 }
 
