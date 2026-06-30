@@ -53,15 +53,33 @@ def fmt_num(v, dec=0):
     return f"{float(v):,.{dec}f}"
 
 
+def _table_to_text(table):
+    """Renderiza la tabla (lista de filas) como bloque delimitado por ' | '.
+
+    La tabla de `structuredContent` la renderiza la UI para el USUARIO; la IA
+    NO la recibe por ese canal. Este texto es la copia que sí ve la IA, para
+    que sus conclusiones se apoyen en TODOS los números, no sólo en el resumen.
+    """
+    if not table:
+        return ""
+    return "\n".join(" | ".join(str(c) for c in row) for row in table)
+
+
 def text_result(text, sources, table=None, charts=None):
     sc = {"sources": sources}
     if table:
         sc["table"] = table
     if charts:
         sc["charts"] = charts
-    text = f"{text}\n\n{SIN_ESPECULAR}"
+    body = text
+    if table:
+        body += (
+            "\n\n=== Datos completos (para tu análisis) ===\n"
+            + _table_to_text(table)
+        )
+    body = f"{body}\n\n{SIN_ESPECULAR}"
     return CallToolResult(
-        content=[TextContent(type="text", text=text)],
+        content=[TextContent(type="text", text=body)],
         structuredContent=sc,
     )
 
