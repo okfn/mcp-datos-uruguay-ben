@@ -98,6 +98,23 @@ def empty_result(label, sources):
     )
 
 
+def rango(df, col="anio"):
+    """'1965-2024', o '2024' si hay un solo año en el df (asume df no vacío)."""
+    a0, a1 = int(df[col].min()), int(df[col].max())
+    return f"{a1}" if a0 == a1 else f"{a0}-{a1}"
+
+
+def cagr(v0, v1, n):
+    """Tasa de crecimiento anual compuesta (%) entre v0 y v1 en n años.
+
+    Devuelve None si no es calculable (n<=0, valores nulos o v0<=0)."""
+    if n <= 0 or v0 is None or v1 is None:
+        return None
+    if pd.isna(v0) or pd.isna(v1) or float(v0) <= 0:
+        return None
+    return ((float(v1) / float(v0)) ** (1 / n) - 1) * 100
+
+
 def pct_renovable(row, fuentes, renovables, total_col="TOTAL"):
     """% renovable de una fila: suma de las `fuentes` cuya etiqueta está en
     `renovables`, sobre el total. Devuelve None si el total es 0/NaN.

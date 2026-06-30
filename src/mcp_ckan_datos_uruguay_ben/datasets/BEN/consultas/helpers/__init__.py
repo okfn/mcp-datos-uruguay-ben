@@ -20,8 +20,11 @@ from .data import (
     PORTAL,
     DATASET_PAGES,
     DATASET_URLS,
+    PRIMER_ANIO_MIX_SIN,
     load_dataset,
     filter_years,
+    share_renovable_sin,
+    sin_detalle,
 )
 from .units import UNIT_BLURB, unit_blurb
 from .charts import (
@@ -42,6 +45,8 @@ from .format import (
     text_result,
     empty_result,
     pct_renovable,
+    rango,
+    cagr,
     build_table,
 )
 from .metodologia import (
@@ -53,7 +58,8 @@ from .metodologia import (
 
 __all__ = [
     # data
-    "PORTAL", "DATASET_PAGES", "DATASET_URLS", "load_dataset", "filter_years",
+    "PORTAL", "DATASET_PAGES", "DATASET_URLS", "PRIMER_ANIO_MIX_SIN",
+    "load_dataset", "filter_years", "share_renovable_sin", "sin_detalle",
     # units
     "UNIT_BLURB", "unit_blurb",
     # charts
@@ -63,7 +69,7 @@ __all__ = [
     "BEN_PALETTE", "COLORES_BEN", "ben_color",
     # format
     "ALREADY_TABLE", "ALREADY_CHART", "SOURCE_FOOTER", "fmt_num",
-    "text_result", "empty_result", "pct_renovable",
+    "text_result", "empty_result", "pct_renovable", "rango", "cagr",
     "build_table",
     # metodologia
     "DEFINICIONES_BEN", "CONCEPTOS_DISPONIBLES", "definiciones_relevantes",
