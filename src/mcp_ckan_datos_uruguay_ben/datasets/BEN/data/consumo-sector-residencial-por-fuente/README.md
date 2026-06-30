@@ -62,8 +62,25 @@ supergás (GLP) 106.0, gas natural 19.4, residuos de biomasa 7.6, solar 6.6.
   residencial y su evolución (la leña pasó de dominante a ser superada por
   la electricidad).
 - **Electrificación** - participación de `EE`: `EE / TOTAL` = 49.6% en 2024.
-- **% renovables del residencial** = `(S + L + RB + CV + Be + Bd) / TOTAL`
-  = 302.6 / 864.1 ≈ 35% en 2024 (leña es el grueso).
+- **Renovables directas del hogar** = `(S + L + RB + CV + Be + Bd) / TOTAL`
+  = 302.6 / 864.1 ≈ 35% en 2024 (leña es el grueso). OJO: esto NO es el
+  "% renovable del consumo" oficial, es sólo el componente que se ve en este
+  dataset (no incluye la electricidad).
+- **% renovable oficial del hogar (criterio Indicador ODS 7.2.1)** - el BEN
+  define la "Proporción de la energía renovable en el consumo final total de
+  energía" contando **además la parte renovable de la electricidad**. Este
+  dataset reporta la electricidad como una sola columna (`EE`) sin desglosar
+  qué fracción es renovable, así que el indicador NO se calcula con este CSV
+  solo: hay que cruzarlo con la matriz de generación del SIN
+  (`miem-generacion-de-electricidad-por-fuente`, desde 2002) para repartir
+  `EE` en renovable/fósil. Con ese cruce:
+  `(S + L + RB + CV + Be + Bd + EE * %renov_SIN) / TOTAL` ≈ **84% en 2024**
+  (SIN 98.9% renovable). El 64% que publica el BEN es el indicador **nacional**
+  (todos los sectores), no el residencial; ese 64% también se reproduce
+  cruzando `consumo-final-energetico-por-fuente` con el SIN (da 63.7% en 2024,
+  >50% en 2013, ~60% promedio de la última década, igual que el libro).
+  Tools: `renovables_residencial_uy` (serie) y
+  `renovable_residencial_calculo_uy` (cálculo paso a paso de un año).
 - **Sustitución de fuentes fósiles** - caída del queroseno (`Q`) y avance
   del supergás (`GLP`) y la electricidad a lo largo de las décadas.
 
