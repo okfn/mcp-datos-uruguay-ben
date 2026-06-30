@@ -346,7 +346,7 @@ DEFINICIONES_BEN = {
             "60%, en promedio, en la última década."
         ),
         "seccion": "§7.2 (Indicador 7.2.1)",
-        "tools": ["renovables_residencial_uy"],
+        "tools": ["renovables_residencial_uy", "renovables_transporte_uy"],
     },
 }
 
