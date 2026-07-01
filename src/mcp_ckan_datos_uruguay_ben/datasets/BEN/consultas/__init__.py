@@ -32,6 +32,15 @@ from .consumo_hogares import (
     renovables_residencial,
     renovable_residencial_calculo,
 )
+from .consumo_transporte import (
+    consumo_transporte_por_fuente,
+    tendencia_consumo_transporte,
+    participacion_fuentes_transporte,
+    fuente_transporte_detalle,
+    renovables_transporte,
+    renovable_transporte_calculo,
+)
+
 from .abastecimiento import (
     matriz_abastecimiento_primario,
     dependencia_energetica_externa,
@@ -61,6 +70,12 @@ __all__ = [
     "fuente_residencial_detalle",
     "renovables_residencial",
     "renovable_residencial_calculo",
+    "consumo_transporte_por_fuente",
+    "tendencia_consumo_transporte",
+    "participacion_fuentes_transporte",
+    "fuente_transporte_detalle",
+    "renovables_transporte",
+    "renovable_transporte_calculo",
     "matriz_abastecimiento_primario",
     "dependencia_energetica_externa",
     "perdidas_transformacion",

@@ -67,6 +67,12 @@ DATA_TOOLS = [
     ("fuente_residencial_detalle", ben.fuente_residencial_detalle, {"fuente": "L"}),
     ("renovables_residencial", ben.renovables_residencial, {}),
     ("renovable_residencial_calculo", ben.renovable_residencial_calculo, {}),
+    ("consumo_transporte_por_fuente", ben.consumo_transporte_por_fuente, {}),
+    ("tendencia_consumo_transporte", ben.tendencia_consumo_transporte, {}),
+    ("participacion_fuentes_transporte", ben.participacion_fuentes_transporte, {}),
+    ("fuente_transporte_detalle", ben.fuente_transporte_detalle, {"fuente": "Go"}),
+    ("renovables_transporte", ben.renovables_transporte, {}),
+    ("renovable_transporte_calculo", ben.renovable_transporte_calculo, {}),
     ("matriz_generacion_electrica", ben.matriz_generacion_electrica, {}),
     ("potencia_instalada_por_fuente", ben.potencia_instalada_por_fuente, {}),
     ("factor_emision_electrico", ben.factor_emision_electrico, {}),
@@ -105,7 +111,8 @@ def test_tool_embeds_full_table_in_ai_text(seed_cache, name, fn, kwargs):
 @pytest.mark.parametrize(
     "fn",
     [ben.consumo_residencial_por_fuente, ben.matriz_generacion_electrica,
-     ben.consumo_final_por_fuente, ben.emisiones_co2_por_sector],
+     ben.consumo_final_por_fuente, ben.emisiones_co2_por_sector,
+     ben.consumo_transporte_por_fuente, ben.participacion_fuentes_transporte],
 )
 def test_multianio_incluye_todos_los_anios_en_texto(seed_cache, fn):
     res = fn()

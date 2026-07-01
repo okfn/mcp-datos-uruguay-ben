@@ -67,6 +67,10 @@ COLORES_BEN = {
     "Gas manufacturado": ben_color(_FUENTES, "Gas manufacturado"),
     "Bioetanol": ben_color(_FUENTES, "Bioetanol"),
     "Biodiésel": ben_color(_FUENTES, "Biodiésel"),
+    # --- Fuentes del consumo del transporte (consumo_transporte) ----------
+    "Gasolina aviación": ben_color(_FUENTES, "Gasolina aviación"),
+    # Turbocombustible es un combustible tipo queroseno (jet): mismo color.
+    "Turbocombustible": ben_color(_FUENTES, "Queroseno"),
     # Clasificación renovable/no renovable del hogar (renovables_residencial)
     "Renovable": ben_color(_OFERTA, "Renovable"),
     "No renovable": ben_color(_OFERTA, "No renovable"),
