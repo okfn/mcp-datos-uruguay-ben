@@ -23,6 +23,9 @@ FIXTURE_COLUMNS = {
         "EE", "L", "GLP", "GN", "RB", "S", "Go", "CV", "Q",
         "Ga", "Fo", "Be", "Do", "GM", "Bd", "TOTAL",
     ],
+    "consumo_transporte": [
+        "Ga", "GAv", "Q", "T", "Do", "Go", "Fo", "Be", "Bd", "EE", "TOTAL",
+    ],
     "generacion": ["EE_H", "EE_Eo", "EE_S", "EE_B", "EE_F", "TOTAL"],
     "potencia": [
         "TOTAL_H", "TOTAL_Eo", "TOTAL_S", "TOTAL_B", "TOTAL_F",

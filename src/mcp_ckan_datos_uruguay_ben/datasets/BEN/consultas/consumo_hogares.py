@@ -88,22 +88,6 @@ GLOSARIO_COLS = (
 _TITULO = "Consumo de energía del sector residencial (hogares)"
 
 
-def _rango(df):
-    """'1965-2024' o '2024' si hay un solo año."""
-    if len(df) == 1:
-        return f"{int(df['anio'].iloc[0])}"
-    return f"{int(df['anio'].min())}-{int(df['anio'].max())}"
-
-
-def _cagr(v0, v1, n):
-    """Tasa de crecimiento anual compuesta (%), o None si no es calculable."""
-    if n <= 0 or v0 is None or v1 is None:
-        return None
-    if pd.isna(v0) or pd.isna(v1) or float(v0) <= 0:
-        return None
-    return ((float(v1) / float(v0)) ** (1 / n) - 1) * 100
-
-
 def _pct_renov_row(row):
     """% renovable DIRECTA de una fila: leña, CV, biomasa, solar y
     biocombustibles, SIN contar la electricidad (no es el % oficial 7.2.1;
@@ -130,7 +114,7 @@ def consumo_residencial_por_fuente(anio_desde=None, anio_hasta=None) -> DataTool
 
     ult = df.iloc[-1]
     anio_ult = int(ult["anio"])
-    rango = _rango(df)
+    rango = h.rango(df)
 
     pct_dir = h.pct_renovable(ult, FUENTES_RESID, RENOVABLES_RESID)
 
@@ -186,7 +170,7 @@ def tendencia_consumo_residencial(anio_desde=None, anio_hasta=None) -> DataToolO
     if df.empty:
         return h.empty_result("de consumo residencial total en ese rango", src)
 
-    rango = _rango(df)
+    rango = h.rango(df)
     ult = df.iloc[-1]
     prim = df.iloc[0]
     n = int(ult["anio"]) - int(prim["anio"])
@@ -197,7 +181,7 @@ def tendencia_consumo_residencial(anio_desde=None, anio_hasta=None) -> DataToolO
         f"  - {int(ult['anio'])}: {h.fmt_num(ult['TOTAL'], 1)} ktep "
         f"(≈ {float(ult['TOTAL']) * 11.63 / 1000:.1f} TWh equivalentes).",
     ]
-    cagr = _cagr(prim["TOTAL"], ult["TOTAL"], n)
+    cagr = h.cagr(prim["TOTAL"], ult["TOTAL"], n)
     if cagr is not None:
         delta_pct = (float(ult["TOTAL"]) / float(prim["TOTAL"]) - 1) * 100
         lines.append(f"  - {int(prim['anio'])}: {h.fmt_num(prim['TOTAL'], 1)} ktep.")
@@ -268,7 +252,7 @@ def electrificacion_hogares(anio_desde=None, anio_hasta=None) -> DataToolOutput:
     if df.empty:
         return h.empty_result("de consumo residencial en ese rango", src)
 
-    rango = _rango(df)
+    rango = h.rango(df)
 
     # Series de participación (%) por fuente.
     shares = {}
@@ -383,7 +367,7 @@ def fuente_residencial_detalle(fuente, anio_desde=None, anio_hasta=None) -> Data
     if df.empty:
         return h.empty_result(f"de {label} en el hogar en ese rango", src)
 
-    rango = _rango(df)
+    rango = h.rango(df)
     con_dato = df[df[col].notna()]
 
     lines = [f"{_TITULO}: {label} ({col}), {rango} (ktep)."]
@@ -398,7 +382,7 @@ def fuente_residencial_detalle(fuente, anio_desde=None, anio_hasta=None) -> Data
         idx_max = con_dato[col].astype(float).idxmax()
         fila_max = con_dato.loc[idx_max]
         n = int(ult["anio"]) - int(prim["anio"])
-        cagr = _cagr(prim[col], ult[col], n)
+        cagr = h.cagr(prim[col], ult[col], n)
 
         lines += [
             "",
@@ -455,35 +439,6 @@ def fuente_residencial_detalle(fuente, anio_desde=None, anio_hasta=None) -> Data
 # aparte: la reparte en su parte renovable y su parte fósil según el mix de
 # generación del SIN de cada año (dataset de generación). Ese mix sólo existe
 # desde 2002, así que el indicador se reporta a partir de ese año.
-PRIMER_ANIO_RENOV = 2002
-_GEN_RENOV_COLS = ["EE_H", "EE_Eo", "EE_S", "EE_B"]  # hidro, eólica, solar, biomasa
-
-
-def _share_renovable_sin():
-    """{año: fracción renovable de la generación del SIN} (0-1), desde 2002."""
-    gen = h.load_dataset("generacion")
-    share = {}
-    for _, gr in gen.iterrows():
-        tot = float(gr["TOTAL"]) if pd.notna(gr["TOTAL"]) else 0.0
-        if tot:
-            renov = sum(float(gr[c]) for c in _GEN_RENOV_COLS if pd.notna(gr[c]))
-            share[int(gr["anio"])] = renov / tot
-    return share
-
-
-def _sin_detalle(anio):
-    """(fracción renovable, GWh renovables, GWh totales) del SIN para `anio`,
-    o None si no hay datos de generación ese año (serie desde 2002)."""
-    gen = h.load_dataset("generacion")
-    fila = gen[gen["anio"] == int(anio)]
-    if fila.empty:
-        return None
-    gr = fila.iloc[0]
-    tot = float(gr["TOTAL"]) if pd.notna(gr["TOTAL"]) else 0.0
-    if not tot:
-        return None
-    renov = sum(float(gr[c]) for c in _GEN_RENOV_COLS if pd.notna(gr[c]))
-    return renov / tot, renov, tot
 
 
 def renovables_residencial(anio_desde=None, anio_hasta=None) -> DataToolOutput:
@@ -494,8 +449,8 @@ def renovables_residencial(anio_desde=None, anio_hasta=None) -> DataToolOutput:
     # El criterio oficial necesita el mix renovable del SIN, disponible desde
     # 2002; recortamos el rango a esa cobertura.
     desde = (
-        max(int(anio_desde), PRIMER_ANIO_RENOV)
-        if anio_desde is not None else PRIMER_ANIO_RENOV
+        max(int(anio_desde), h.PRIMER_ANIO_MIX_SIN)
+        if anio_desde is not None else h.PRIMER_ANIO_MIX_SIN
     )
     df = h.load_dataset("consumo_residencial")
     df = h.filter_years(df, desde, anio_hasta)
@@ -506,9 +461,9 @@ def renovables_residencial(anio_desde=None, anio_hasta=None) -> DataToolOutput:
             src,
         )
 
-    share_sin = _share_renovable_sin()
+    share_sin = h.share_renovable_sin()
     renov_cols = [col for col, et in FUENTES_RESID if et in RENOVABLES_RESID]
-    rango = _rango(df)
+    rango = h.rango(df)
 
     anios, s_dir, s_ee_ren, s_norenov, s_pct = [], [], [], [], []
     for _, row in df.iterrows():
@@ -626,7 +581,7 @@ def renovable_residencial_calculo(anio=None) -> DataToolOutput:
         if et in RENOVABLES_RESID and pd.notna(row[col]) and float(row[col]) > 0
     ]
     directas = sum(v for _, v in directas_det)
-    sin = _sin_detalle(anio)
+    sin = h.sin_detalle(anio)
 
     enc = (
         f"{_TITULO}: cálculo del % renovable del hogar - año {anio}.\n\n"

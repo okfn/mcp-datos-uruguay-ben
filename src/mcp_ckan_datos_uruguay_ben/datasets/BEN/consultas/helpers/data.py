@@ -25,6 +25,7 @@ DATASET_PAGES = {
     "generacion":             PORTAL + "miem-generacion-de-electricidad-por-fuente",
     "potencia":               PORTAL + "miem-potencia-instalada-por-fuente",
     "consumo_residencial":    PORTAL + "ministerio-industra-energia-mineria-ben-consumo-sector-residencial-por-fuente",
+    "consumo_transporte":     PORTAL + "ministerio-de-industria-energia-y-mineria-ben-consumo-sector-transporte-por-fuente",
 }
 
 # Cada entrada es (dataset_uuid, resource_uuid, filename) - verificada
@@ -86,6 +87,11 @@ _DATASET_PARTS = {
         "a7318ff7-16da-498b-a475-a810e7ace162",
         "consumo-sector-residencial-por-fuente.csv",
     ),
+    "consumo_transporte": (
+        "88219cac-31cb-4b62-a4b0-786d18072a9c",
+        "1a4de650-9eb9-47e4-9339-df0da15adca0",
+        "consumo-sector-transporte-por-fuente.csv",
+    ),
 }
 
 DATASET_URLS = {
@@ -100,6 +106,7 @@ DATASET_URLS = {
 _DEFAULT_READ_OPTS = {"sep": ";", "encoding": "latin-1"}
 _DATASET_READ_OPTS = {
     "consumo_residencial": {"sep": ",", "encoding": "utf-8", "decimal": ","},
+    "consumo_transporte": {"sep": ",", "encoding": "utf-8", "decimal": ","},
 }
 
 _caches = {}
@@ -143,3 +150,40 @@ def filter_years(df, anio_desde=None, anio_hasta=None):
     if anio_hasta is not None:
         df = df[df["anio"] <= int(anio_hasta)]
     return df.sort_values("anio").reset_index(drop=True)
+
+
+# ── Fracción renovable del SIN (para el criterio ODS 7.2.1 del consumo) ────
+# El % renovable del consumo final cuenta la parte renovable de la
+# electricidad; esa fracción sale del mix de generación del SIN (dataset
+# `generacion`), disponible desde 2002. Lo usan las tools de renovables de
+# cada sector de consumo (residencial, transporte, ...), por eso vive acá y
+# no duplicado en cada módulo.
+PRIMER_ANIO_MIX_SIN = 2002
+_GEN_RENOV_COLS = ["EE_H", "EE_Eo", "EE_S", "EE_B"]  # hidro, eólica, solar, biomasa
+
+
+def share_renovable_sin():
+    """{año: fracción renovable de la generación del SIN} (0-1), desde 2002."""
+    gen = load_dataset("generacion")
+    share = {}
+    for _, gr in gen.iterrows():
+        tot = float(gr["TOTAL"]) if pd.notna(gr["TOTAL"]) else 0.0
+        if tot:
+            renov = sum(float(gr[c]) for c in _GEN_RENOV_COLS if pd.notna(gr[c]))
+            share[int(gr["anio"])] = renov / tot
+    return share
+
+
+def sin_detalle(anio):
+    """(fracción renovable, GWh renovables, GWh totales) del SIN para `anio`,
+    o None si no hay datos de generación ese año (serie desde 2002)."""
+    gen = load_dataset("generacion")
+    fila = gen[gen["anio"] == int(anio)]
+    if fila.empty:
+        return None
+    gr = fila.iloc[0]
+    tot = float(gr["TOTAL"]) if pd.notna(gr["TOTAL"]) else 0.0
+    if not tot:
+        return None
+    renov = sum(float(gr[c]) for c in _GEN_RENOV_COLS if pd.notna(gr[c]))
+    return renov / tot, renov, tot

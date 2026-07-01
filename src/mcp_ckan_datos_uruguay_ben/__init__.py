@@ -72,6 +72,11 @@ def _register_ben_tools(mcp):  # noqa: C901
             "¿Cuándo dejó de usarse el queroseno en los hogares?",
             "¿Qué tan renovable es la energía que usan los hogares?",
             "¿Cómo se calcula el % renovable del consumo de los hogares?",
+            "¿Con qué energía se mueve el transporte en Uruguay?",
+            "¿Cuánto pesan el gasoil y la gasolina en el transporte?",
+            "¿Cuándo entraron los biocombustibles al transporte y cuánto pesan?",
+            "¿Aumenta el consumo de energía del transporte?",
+            "¿Qué tan renovable es el transporte? ¿Por qué cuesta descarbonizarlo?",
             "¿Qué significa 'energía final' en el BEN?",
             "¿Qué incluye 'residuos de biomasa'?",
             "¿Cómo define el BEN el ktep?",
@@ -526,6 +531,201 @@ def _register_ben_tools(mcp):  # noqa: C901
             - renovable_residencial_calculo_uy(anio=2010)
         """
         return ben.renovable_residencial_calculo(anio=anio)
+
+    @mcp.tool()
+    def consumo_transporte_por_fuente_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """Consumo de energía del SECTOR TRANSPORTE de Uruguay, abierto fuente
+            por fuente, en ktep.
+            Muestra qué combustibles mueven el transporte: gasoil, gasolina
+            automotora, biocombustibles (bioetanol, biodiésel), turbocombustible
+            y gasolina de aviación, fueloil (marítimo), y la incipiente
+            electricidad.
+            Útil para:
+                - ¿Con qué energía se mueve el transporte en Uruguay?
+                - ¿Cuánto pesan el gasoil y la gasolina?
+                - ¿Qué porcentaje es biocombustible?
+                - ¿Cómo cambió el mix del transporte desde 1965?
+            El TOTAL coincide con la columna 'Transporte' de
+            `consumo_energetico_por_sector_uy` (misma magnitud, otra apertura).
+            Cobertura: 1965-2024 (anual). Pie chart si se pide 1 año, stacked
+            bar si se piden varios. **ktep ≈ 11.63 GWh.**
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - consumo_transporte_por_fuente_uy()
+            - consumo_transporte_por_fuente_uy(anio_desde=2024, anio_hasta=2024)
+            - consumo_transporte_por_fuente_uy(anio_desde=2000)
+        """
+        return ben.consumo_transporte_por_fuente(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def tendencia_consumo_transporte_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """Evolución del consumo energético TOTAL del sector transporte de
+            Uruguay, en ktep/año.
+            Vista macro del transporte: ¿consume más o menos energía que antes?
+            ¿cuánto creció? El transporte es de los sectores que más creció en
+            demanda.
+            Útil para:
+                - ¿Cuánta energía consume el transporte en Uruguay?
+                - ¿Aumenta o baja el consumo del transporte?
+                - ¿Cómo evolucionó desde 1965 / en la última década?
+            Devuelve serie de tiempo (gráfico de líneas) del TOTAL del sector.
+            Cobertura: 1965-2024 (anual). BEN no incluye parque automotor ni
+            población; cruzar con otras fuentes para 'consumo por vehículo'.
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - tendencia_consumo_transporte_uy()
+            - tendencia_consumo_transporte_uy(anio_desde=2000)
+            - tendencia_consumo_transporte_uy(anio_desde=2020)
+        """
+        return ben.tendencia_consumo_transporte(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def participacion_fuentes_transporte_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """Participación (%) de cada fuente en el consumo del transporte de
+            Uruguay a lo largo del tiempo, con foco en la entrada de los
+            biocombustibles (2010) y el peso gasoil vs gasolina.
+            A diferencia de `consumo_transporte_por_fuente_uy` (que da ktep
+            absolutos), entrega porcentajes del total de cada año.
+            Útil para:
+                - ¿Qué fuente domina el transporte y cómo cambió?
+                - ¿Cuándo entraron los biocombustibles y cuánto pesan?
+                - ¿Cuándo el gasoil superó a la gasolina?
+            Devuelve un gráfico de líneas con la participación (%) de las
+            principales fuentes año a año.
+            Cobertura: 1965-2024 (anual). Los valores son % del total del año,
+            no ktep (para absolutos usar `consumo_transporte_por_fuente_uy`).
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - participacion_fuentes_transporte_uy()
+            - participacion_fuentes_transporte_uy(anio_desde=2005)
+            - participacion_fuentes_transporte_uy(anio_desde=2010, anio_hasta=2024)
+        """
+        return ben.participacion_fuentes_transporte(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def fuente_transporte_detalle_uy(
+        fuente: str,
+        anio_desde: int | None = None,
+        anio_hasta: int | None = None,
+    ) -> DataToolOutput:
+        """Serie histórica de UNA fuente puntual en el consumo del transporte
+            de Uruguay, en ktep (drill-down para análisis fino).
+            Devuelve la evolución de esa fuente, su participación en el total
+            del transporte, su año pico, su primer año con dato y su
+            crecimiento anual compuesto.
+            Útil para:
+                - ¿Cómo evolucionó el gasoil / la gasolina / el biodiésel?
+                - ¿Cuándo entraron los biocombustibles y cuánto crecieron?
+                - ¿En qué año fue máximo el consumo de una fuente?
+            Cobertura: 1965-2024 (anual). Devuelve gráfico de líneas de la
+            fuente elegida.
+
+        Args:
+            fuente: Código de la fuente a analizar. Opciones (código = fuente):
+                Go = gasoil, Ga = gasolina automotora, Be = bioetanol,
+                Bd = biodiésel, EE = electricidad, T = turbocombustible,
+                GAv = gasolina de aviación, Fo = fueloil, Do = diéseloil,
+                Q = queroseno. Acepta también el nombre (ej. "gasoil",
+                "biodiesel", "turbo").
+            anio_desde: Año inicial del rango (incluido). Default: 1965.
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - fuente_transporte_detalle_uy(fuente="Go")
+            - fuente_transporte_detalle_uy(fuente="Bd", anio_desde=2010)
+            - fuente_transporte_detalle_uy(fuente="Ga")
+        """
+        return ben.fuente_transporte_detalle(
+            fuente=fuente, anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def renovables_transporte_uy(
+        anio_desde: int | None = None, anio_hasta: int | None = None
+    ) -> DataToolOutput:
+        """% renovable del consumo del transporte de Uruguay según el criterio
+            del **Indicador ODS 7.2.1 del BEN**, año a año.
+            Cuenta como renovable los biocombustibles (bioetanol, biodiésel) y
+            la parte renovable de la electricidad consumida (repartida según el
+            mix de generación del SIN de cada año). La serie arranca en **2002**
+            (primer año con mix del SIN); los biocombustibles entraron en 2010.
+            Útil para:
+                - ¿Qué tan renovable es la energía del transporte?
+                - ¿Cómo evolucionó el % renovable del transporte?
+                - ¿Por qué el transporte es el sector más difícil de
+                  descarbonizar?
+            El transporte es el sector más fósil: el % renovable es bajo aun con
+            este criterio. El 64% que publica el BEN para 2024 es el indicador
+            NACIONAL (todos los sectores), no el del transporte.
+            Cobertura: 2002-2024 (anual). Devuelve gráfico de barras apiladas
+            (renovable vs no renovable). **ktep ≈ 11.63 GWh.**
+
+        Args:
+            anio_desde: Año inicial del rango (incluido). Default y mínimo:
+                2002 (sin mix del SIN no se puede aplicar el criterio 7.2.1).
+            anio_hasta: Año final del rango (incluido). Default: último año.
+
+        Examples:
+            - renovables_transporte_uy()
+            - renovables_transporte_uy(anio_desde=2010)
+            - renovables_transporte_uy(anio_desde=2024, anio_hasta=2024)
+        """
+        return ben.renovables_transporte(
+            anio_desde=anio_desde, anio_hasta=anio_hasta,
+        )
+
+    @mcp.tool()
+    def renovable_transporte_calculo_uy(anio: int | None = None) -> DataToolOutput:
+        """% renovable del consumo del transporte de Uruguay para UN año,
+            mostrando el **cálculo paso a paso** a partir de los dos datasets
+            que lo alimentan (consumo transporte por fuente + generación
+            eléctrica del SIN). Es la versión auditable/explicativa de
+            `renovables_transporte_uy`.
+            Muestra: (1) los biocombustibles del transporte, (2) la fracción
+            renovable del SIN ese año (GWh renovables / GWh totales), (3) la
+            electricidad renovable del transporte, (4) el % renovable final, y
+            la comparación con el renovable "sólo biocombustibles".
+            Útil para:
+                - ¿Cómo se calcula el % renovable del transporte?
+                - ¿Cuánto aportan los biocombustibles vs la electricidad?
+            Para años anteriores a 2002 (sin mix del SIN) sólo informa el
+            renovable directo y lo aclara. Devuelve un pie chart con la
+            composición del año.
+
+        Args:
+            anio: Año a desglosar. Default: último año disponible (2024). El
+                criterio completo (con electricidad) requiere año >= 2002.
+
+        Examples:
+            - renovable_transporte_calculo_uy()
+            - renovable_transporte_calculo_uy(anio=2024)
+            - renovable_transporte_calculo_uy(anio=2015)
+        """
+        return ben.renovable_transporte_calculo(anio=anio)
 
     @mcp.tool()
     def matriz_energetica_primaria_uy(
