@@ -214,9 +214,9 @@ _FUENTES_SHARE = [
 
 def participacion_fuentes_transporte(anio_desde=None, anio_hasta=None) -> DataToolOutput:
     """Participación (%) de cada fuente en el consumo del transporte a lo largo
-    del tiempo, con foco en la entrada de los biocombustibles (2010)."""
-    df = h.load_dataset("consumo_transporte")
-    df = h.filter_years(df, anio_desde, anio_hasta)
+    del tiempo, con foco en la entrada de los biocombustibles."""
+    df_full = h.load_dataset("consumo_transporte")
+    df = h.filter_years(df_full, anio_desde, anio_hasta)
     src = [h.DATASET_PAGES["consumo_transporte"]]
     if df.empty:
         return h.empty_result("de consumo del transporte en ese rango", src)
@@ -252,18 +252,21 @@ def participacion_fuentes_transporte(anio_desde=None, anio_hasta=None) -> DataTo
         (int(df.iloc[i]["anio"]) for i in range(len(df)) if bio_share[i] > 0),
         None,
     )
+    con_bio = df_full[df_full[["Be", "Bd"]].fillna(0).sum(axis=1) > 0]
+    primer_bio_serie = int(con_bio["anio"].min()) if not con_bio.empty else None
+    nota_bio = (
+        f" (en la serie completa aparecen desde {primer_bio_serie})"
+        if primer_bio_serie is not None else ""
+    )
     lines.append("")
     if primer_bio is not None:
         lines.append(
             f"  -> Biocombustibles (bioetanol + biodiésel): "
             f"{bio_share[-1]:.1f}% del transporte en {int(ult['anio'])}; "
-            f"primer año con presencia en el rango: {primer_bio} "
-            "(entraron a nivel nacional en 2010)."
+            f"primer año con presencia en el rango: {primer_bio}{nota_bio}."
         )
     else:
-        lines.append(
-            "  -> Sin biocombustibles en el rango (entraron a nivel nacional en 2010)."
-        )
+        lines.append(f"  -> Sin biocombustibles en el rango{nota_bio}.")
 
     # Cruce gasoil <-> gasolina automotora.
     cruce = None
@@ -416,8 +419,7 @@ def fuente_transporte_detalle(fuente, anio_desde=None, anio_hasta=None) -> DataT
 # renovables directas son los biocombustibles (Be + Bd); a eso se le suma la
 # electricidad renovable, repartiendo la electricidad del sector segun el mix
 # de generacion del SIN de cada ano. Ese mix solo existe desde 2002, asi que
-# el indicador se reporta a partir de ese ano (los biocombustibles, ademas,
-# entraron en 2010).
+# el indicador se reporta a partir de ese ano.
 
 def renovables_transporte(anio_desde=None, anio_hasta=None) -> DataToolOutput:
     """% renovable del consumo del transporte según el criterio del Indicador
@@ -571,7 +573,7 @@ def renovable_transporte_calculo(anio=None) -> DataToolOutput:
         for et, v in directas_det:
             p1.append(f"    {et:<22}: {h.fmt_num(v, 1):>8} ktep")
     else:
-        p1.append("    (sin biocombustibles ese año; entraron a nivel nacional en 2010)")
+        p1.append("    (sin biocombustibles ese año)")
     p1.append(f"    {'SUMA biocombustibles':<22}: {h.fmt_num(directas, 1):>8} ktep")
 
     if sin is None:
@@ -640,12 +642,10 @@ def renovable_transporte_calculo(anio=None) -> DataToolOutput:
         "",
         f"Para comparar: contando SÓLO los biocombustibles (sin la "
         f"electricidad) el {anio} daría {pct_dir:.1f}%. La diferencia "
-        f"({pct - pct_dir:+.1f} pp) es el aporte de la electricidad renovable "
-        "(muy chico: la movilidad eléctrica es todavía marginal).",
+        f"({pct - pct_dir:+.1f} pp) es el aporte de la electricidad renovable.",
         "",
-        "Nota: el transporte es el sector más fósil de la matriz; este % "
-        "renovable es bajo aun con el criterio oficial. Es el mismo criterio "
-        "del indicador NACIONAL del BEN (64% en 2024, todos los sectores).",
+        "Nota: es el mismo criterio del indicador NACIONAL del BEN (todos "
+        "los sectores; ver la definición del Indicador 7.2.1 adjunta).",
         "",
         GLOSARIO_COLS,
         "",

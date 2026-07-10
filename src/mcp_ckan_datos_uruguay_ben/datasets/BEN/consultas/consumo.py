@@ -6,7 +6,7 @@ Cubre dos datasets MIEM:
   - `miem-consumo-final-energetico-por-sector`  (ktep, desde 1965)
 
 El TOTAL de ambos coincide para el mismo año (misma magnitud, dos
-desagregaciones). Verificado: 2024 = 6076.4 ktep en ambos.
+desagregaciones).
 
 Preguntas del README cubiertas:
   - 1.1 consumo total último año

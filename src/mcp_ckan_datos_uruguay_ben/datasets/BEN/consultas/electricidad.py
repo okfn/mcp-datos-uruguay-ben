@@ -229,8 +229,6 @@ def factor_emision_electrico(anio_desde=None, anio_hasta=None) -> DataToolOutput
         "sube en los años con mayor despacho de térmica fósil y baja cuando "
         "crece la generación renovable; ese reparto se ve en la matriz de "
         "generación por fuente (GWh).",
-        "Referencias: térmica a gas ciclo combinado ≈ 350-400; térmica a "
-        "carbón ≈ 800-1.000; renovables (en operación) ≈ 0 t CO2/GWh.",
     ]
     lines.append(h.unit_blurb("t CO2/GWh", "Gg CO2", "GWh"))
     lines.append(h.definiciones_relevantes("emisiones_co2"))
@@ -249,20 +247,11 @@ def factor_emision_electrico(anio_desde=None, anio_hasta=None) -> DataToolOutput
         ])
 
     if len(df) == 1:
-        # Una sola medida: barra simple comparando con referencias visuales.
         chart = h.grouped_bar_chart(
-            f"Factor de emisión del SIN - {anio_ult} vs referencias técnicas",
+            f"Factor de emisión del SIN - {anio_ult} (t CO2/GWh)",
             [anio_ult],
-            [
-                (f"SIN Uruguay {anio_ult}", [fe_ult]),
-                ("Térmica gas ciclo combinado", [375.0]),
-                ("Térmica carbón", [900.0]),
-            ],
-            palette={
-                f"SIN Uruguay {anio_ult}": h.COLORES_BEN["FE_SIN"],
-                "Térmica gas ciclo combinado": h.COLORES_BEN["Gas natural"],
-                "Térmica carbón": h.COLORES_BEN["Carbón mineral"],
-            },
+            [("FE_SIN", [fe_ult])],
+            palette=h.COLORES_BEN,
         )
     else:
         chart = h.line_chart(
