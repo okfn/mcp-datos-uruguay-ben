@@ -2,9 +2,9 @@
 Tools BEN - Importaciones / intercambio externo de energía.
 
 Cubre tres datasets MIEM:
-  - `ben-importacion-de-gas-natural` (ktep, 1965-2024)
-  - `ben-importacion-de-petroleo-y-carga-de-refineria` (ktep, 1965-2024)
-  - `ben-importacion-y-exportacion-de-electricidad` (ktep, 1965-2024)
+  - `ben-importacion-de-gas-natural` (ktep, desde 1965)
+  - `ben-importacion-de-petroleo-y-carga-de-refineria` (ktep, desde 1965)
+  - `ben-importacion-y-exportacion-de-electricidad` (ktep, desde 1965)
 
 Preguntas del README cubiertas:
   - 3.3 tipo de energía importada
@@ -126,8 +126,7 @@ def importacion_gas_natural(anio_desde=None, anio_hasta=None) -> DataToolOutput:
         f"  - {anio_ult}: {h.fmt_num(ult['impo_gas_natural'], 1)} ktep.",
         f"  - Promedio del período: {h.fmt_num(media, 1)} ktep.",
         "",
-        "Contexto: volúmenes modestos comparados con petróleo y biomasa; "
-        "la serie tiene datos desde 1998.",
+        "La serie tiene datos desde 1998.",
     ]
     lines.append(h.definiciones_relevantes("ktep", "gas_natural", "importacion"))
     lines.append("")

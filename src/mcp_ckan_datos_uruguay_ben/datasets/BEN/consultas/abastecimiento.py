@@ -2,7 +2,7 @@
 Tools BEN - Abastecimiento de energía primaria (lado oferta).
 
 Cubre el dataset MIEM `miem-abastecimiento-de-energia-por-fuente` (ktep,
-1965-2024) y construye un derivado para 'pérdidas de transformación'
+desde 1965) y construye un derivado para 'pérdidas de transformación'
 cruzando con `miem-consumo-final-energetico-por-fuente`.
 
 Preguntas del README cubiertas:

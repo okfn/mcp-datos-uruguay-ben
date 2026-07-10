@@ -2,7 +2,7 @@
 Tools BEN - Emisiones de CO2.
 
 Cubre el dataset MIEM `miem-emisiones-de-co2-por-sector` (Gg CO2,
-1965-2024). Para la intensidad del SIN ver `electricidad.factor_emision_electrico`.
+desde 1965). Para la intensidad del SIN ver `electricidad.factor_emision_electrico`.
 
 Preguntas del README cubiertas:
   - 5.1 sectores grandes emisores

@@ -1,7 +1,7 @@
 """
 Tools BEN - Consumo del SECTOR RESIDENCIAL (hogares) por fuente.
 
-Dataset MIEM `ben-consumo-sector-residencial-por-fuente` (ktep, 1965-2024).
+Dataset MIEM `ben-consumo-sector-residencial-por-fuente` (ktep, desde 1965).
 Es la desagregación por fuente del renglón residencial (`R`) del dataset
 `miem-consumo-final-energetico-por-sector`: el TOTAL de aquí coincide con esa
 columna R año a año.
@@ -20,7 +20,7 @@ Tools expuestas (todas con glosario de columnas incrustado para la IA):
   - fuente_residencial_detalle     : serie de UNA fuente (drill-down experto).
   - renovables_residencial         : % renovable del consumo del hogar según
                                      el Indicador ODS 7.2.1 (cuenta la
-                                     electricidad renovable; 2002-2024).
+                                     electricidad renovable; desde 2002).
   - renovable_residencial_calculo  : el mismo % renovable para UN año, con el
                                      cálculo paso a paso desde los dos datasets.
 """
@@ -433,9 +433,8 @@ def fuente_residencial_detalle(fuente, anio_desde=None, anio_hasta=None) -> Data
 
 # ═══ 5. Renovables del hogar (Indicador ODS 7.2.1) ════════════════════════
 # El BEN define el % renovable del consumo final (Indicador ODS 7.2.1)
-# **contando la fracción renovable de la electricidad**: como la matriz
-# eléctrica del SIN es casi totalmente renovable, electrificar usos finales
-# sube el indicador. Por eso esta tool NO trata la electricidad como un bloque
+# **contando la fracción renovable de la electricidad**. Por eso esta tool NO
+# trata la electricidad como un bloque
 # aparte: la reparte en su parte renovable y su parte fósil según el mix de
 # generación del SIN de cada año (dataset de generación). Ese mix sólo existe
 # desde 2002, así que el indicador se reporta a partir de ese año.
@@ -443,7 +442,7 @@ def fuente_residencial_detalle(fuente, anio_desde=None, anio_hasta=None) -> Data
 
 def renovables_residencial(anio_desde=None, anio_hasta=None) -> DataToolOutput:
     """% renovable del consumo del hogar según el criterio del Indicador ODS
-    7.2.1 del BEN (cuenta la electricidad renovable). Cobertura 2002-2024."""
+    7.2.1 del BEN (cuenta la electricidad renovable). Cobertura desde 2002."""
     src = [h.DATASET_PAGES["consumo_residencial"], h.DATASET_PAGES["generacion"]]
 
     # El criterio oficial necesita el mix renovable del SIN, disponible desde
@@ -509,9 +508,9 @@ def renovables_residencial(anio_desde=None, anio_hasta=None) -> DataToolOutput:
         "(Indicador ODS 7.2.1) contando la parte renovable de la electricidad. "
         "Aquí esa parte se estima repartiendo la electricidad del hogar según "
         "el mix de generación del SIN de cada año (`matriz_generacion_electrica_uy`), "
-        "disponible desde 2002. El 64% que publica el BEN para 2024 es el "
-        "indicador NACIONAL (todos los sectores); este es el del sector "
-        "residencial, que es más alto por el peso de la electricidad y la leña.",
+        "disponible desde 2002. No confundir con el indicador nacional que "
+        "publica el BEN (todos los sectores; ver la definición del Indicador "
+        "7.2.1 adjunta): este es sólo el del sector residencial.",
         "",
         GLOSARIO_COLS,
         "",
@@ -671,8 +670,8 @@ def renovable_residencial_calculo(anio=None) -> DataToolOutput:
         "",
         "Notas metodológicas:",
         "  - Es el mismo criterio con el que el BEN calcula su indicador "
-        "NACIONAL (64% en 2024, todos los sectores); este es el del sector "
-        "residencial, más alto por el peso de la electricidad y la leña.",
+        "NACIONAL (todos los sectores; ver la definición del Indicador 7.2.1 "
+        "adjunta); este es sólo el del sector residencial.",
         "  - La fracción renovable se toma del mix de GENERACIÓN del SIN. La "
         "metodología oficial podría usar el mix de abastecimiento eléctrico "
         "(que trata aparte la electricidad importada); la diferencia es menor.",

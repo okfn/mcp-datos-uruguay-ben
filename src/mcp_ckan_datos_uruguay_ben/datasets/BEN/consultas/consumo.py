@@ -2,8 +2,8 @@
 Tools BEN - Consumo final energético (lado demanda).
 
 Cubre dos datasets MIEM:
-  - `miem-consumo-final-energetico-por-fuente` (ktep, 1965-2024)
-  - `miem-consumo-final-energetico-por-sector`  (ktep, 1965-2024)
+  - `miem-consumo-final-energetico-por-fuente` (ktep, desde 1965)
+  - `miem-consumo-final-energetico-por-sector`  (ktep, desde 1965)
 
 El TOTAL de ambos coincide para el mismo año (misma magnitud, dos
 desagregaciones). Verificado: 2024 = 6076.4 ktep en ambos.

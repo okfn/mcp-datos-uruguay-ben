@@ -2,9 +2,9 @@
 Tools BEN - Electricidad.
 
 Cubre tres datasets MIEM:
-  - `miem-generacion-de-electricidad-por-fuente` (GWh, 2002-2024)
-  - `miem-potencia-instalada-por-fuente` (MW, 1990-2024)
-  - `miem-ben-factor-de-emision-de-co2-del-sin` (t CO2/GWh, 1965-2024)
+  - `miem-generacion-de-electricidad-por-fuente` (GWh, desde 2002)
+  - `miem-potencia-instalada-por-fuente` (MW, desde 1990)
+  - `miem-ben-factor-de-emision-de-co2-del-sin` (t CO2/GWh, desde 1965)
 
 Preguntas del README cubiertas: 1.5 (fuentes predominantes en eléctrico),
 2.3 (principal fuente), 2.4 (fuentes que más crecen, vía capacidad), 2.5

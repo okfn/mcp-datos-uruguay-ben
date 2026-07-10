@@ -1,26 +1,24 @@
 """
 Tools BEN - Consumo del SECTOR TRANSPORTE por fuente.
 
-Dataset MIEM `ben-consumo-sector-transporte-por-fuente` (ktep, 1965-2024).
+Dataset MIEM `ben-consumo-sector-transporte-por-fuente` (ktep, desde 1965).
 Es la desagregacion por fuente del renglon transporte (`T`) del dataset
 `miem-consumo-final-energetico-por-sector`: el TOTAL de aqui coincide con esa
-columna T anio a anio (cross-check 2024 = 1492.6 ktep en ambos).
+columna T anio a anio.
 
-El transporte es el sector mas fosil de la matriz: gasoil y gasolina
-automotora explican casi todo el consumo. Las unicas fuentes renovables son
-los biocombustibles (bioetanol y biodiesel, que entraron en 2010 mezclados en
-naftas y gasoil) y, de forma incipiente, la electricidad (movilidad
-electrica). Por eso es el sector mas dificil de descarbonizar.
+Las unicas fuentes renovables del sector son los biocombustibles (bioetanol
+y biodiesel, mezclados en naftas y gasoil) y la electricidad (movilidad
+electrica).
 
 Tools expuestas (todas con glosario de columnas incrustado para la IA):
   - consumo_transporte_por_fuente : mix por fuente + % renovable directo.
   - tendencia_consumo_transporte  : evolucion del consumo TOTAL del sector.
   - participacion_fuentes_transporte : participacion (%) de cada fuente y la
-                                       entrada de los biocombustibles (2010).
+                                       entrada de los biocombustibles.
   - fuente_transporte_detalle     : serie de UNA fuente (drill-down experto).
   - renovables_transporte         : % renovable del consumo segun el
                                      Indicador ODS 7.2.1 (cuenta la
-                                     electricidad renovable; 2002-2024).
+                                     electricidad renovable; desde 2002).
   - renovable_transporte_calculo  : el mismo % renovable para UN anio, con el
                                      calculo paso a paso desde los dos datasets.
 """
@@ -423,7 +421,7 @@ def fuente_transporte_detalle(fuente, anio_desde=None, anio_hasta=None) -> DataT
 
 def renovables_transporte(anio_desde=None, anio_hasta=None) -> DataToolOutput:
     """% renovable del consumo del transporte según el criterio del Indicador
-    ODS 7.2.1 del BEN (cuenta la electricidad renovable). Cobertura 2002-2024."""
+    ODS 7.2.1 del BEN (cuenta la electricidad renovable). Cobertura desde 2002."""
     src = [h.DATASET_PAGES["consumo_transporte"], h.DATASET_PAGES["generacion"]]
 
     desde = (
@@ -482,13 +480,12 @@ def renovables_transporte(anio_desde=None, anio_hasta=None) -> DataToolOutput:
         f"{h.fmt_num(s_ee_ren[i], 1)} ktep, calculada con el {sh_u * 100:.1f}% "
         "renovable del SIN ese año). El desglose anual está en la tabla.",
         "",
-        "El transporte es el sector más fósil: aun contando biocombustibles y "
-        "electricidad renovable, el % renovable es bajo (es el gran desafío de "
-        "descarbonización). La electricidad renovable se estima repartiendo la "
+        "Metodología: la electricidad renovable se estima repartiendo la "
         "electricidad del sector según el mix de generación del SIN de cada año "
-        "(`matriz_generacion_electrica_uy`), disponible desde 2002. El 64% que "
-        "publica el BEN para 2024 es el indicador NACIONAL (todos los "
-        "sectores), no el del transporte.",
+        "(`matriz_generacion_electrica_uy`), disponible desde 2002. No "
+        "confundir con el indicador nacional que publica el BEN (todos los "
+        "sectores; ver la definición del Indicador 7.2.1 adjunta): este es "
+        "sólo el del sector transporte.",
         "",
         GLOSARIO_COLS,
         "",
