@@ -131,7 +131,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cómo evolucionó la matriz desde 2002?
                 - ¿Cuándo entró la energía eólica/solar en Uruguay?
                 - ¿Qué fuentes están creciendo más?
-            Cobertura: 2002-2024 (anual; sin granularidad mensual ni horaria).
+            Cobertura: anual desde 2002 (sin granularidad mensual ni horaria).
             Devuelve un texto con el mix del último año + % renovables, una
             tabla año-por-año con todas las fuentes, y un gráfico: **pie
             chart** si se pide un único año (mix de ese año), o **barras
@@ -146,10 +146,9 @@ def _register_ben_tools(mcp):  # noqa: C901
 
         Args:
             anio_desde: Año inicial del rango (incluido). Default: 2002, el
-                primer año de la serie. Para ver sólo la "era renovable" usar
-                2014.
+                primer año de la serie.
             anio_hasta: Año final del rango (incluido). Default: el último año
-                disponible (típicamente 2024).
+                disponible.
 
         Returns:
             str: Resumen del mix del último año (GWh y % por fuente, % de
@@ -182,7 +181,7 @@ def _register_ben_tools(mcp):  # noqa: C901
             funcionando todo el año al 100% generaría 876 GWh; el cociente
             real (factor de capacidad) es típicamente 30-90%. Para energía
             efectivamente generada usar `matriz_generacion_electrica_uy`.
-            Cobertura útil real: 2003-2024 (datos previos casi todos vacíos).
+            Cobertura útil real: desde 2003 (datos previos casi todos vacíos).
             Pie chart si se pide 1 año, stacked bar si se piden varios.
 
         Args:
@@ -211,11 +210,11 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Qué tan limpia es la matriz eléctrica de Uruguay?
                 - ¿Cómo evolucionó la 'limpieza' del SIN con la transición?
                 - ¿En qué años fue más alta la intensidad de CO2 del SIN?
-            Referencias: térmica gas ciclo combinado ≈ 350-400 t CO2/GWh,
-            térmica carbón ≈ 800-1000, renovables ≈ 0. Uruguay 2024 = 6.3.
-            Cobertura: 1965-2024 anual.
-            Devuelve gráfico de líneas (varios años) o de barras vs
-            referencias técnicas (un solo año).
+            Cobertura: anual desde 1965.
+            Devuelve gráfico de líneas (varios años) o de barras (un solo
+            año). La definición oficial de las emisiones de CO2 del BEN está
+            en `glosario_ben(concepto="emisiones_co2")` y se adjunta a la
+            respuesta.
 
         Args:
             anio_desde: Año inicial del rango (incluido). Default: 1965.
@@ -242,7 +241,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Qué sector consume más energía?
                 - ¿Cómo evolucionó el consumo por sector?
                 - ¿Qué sector creció más?
-            Cobertura: 1965-2024 (anual). Limitación: no hay sub-segmentación
+            Cobertura: anual desde 1965. Limitación: no hay sub-segmentación
             del transporte (auto/ómnibus/aviación no se distinguen). Para
             'intensidad energética industrial' (energía/VAB) hay que cruzar
             con BCU - no está en BEN.
@@ -252,7 +251,7 @@ def _register_ben_tools(mcp):  # noqa: C901
         Args:
             anio_desde: Año inicial del rango (incluido). Default: 1965.
             anio_hasta: Año final del rango (incluido). Default: último
-                año disponible (típicamente 2024).
+                año disponible.
 
         Examples:
             - consumo_energetico_por_sector_uy()
@@ -277,7 +276,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿% renovable del consumo final?
             El TOTAL coincide con el de `consumo_energetico_por_sector_uy`
             (misma magnitud, dos desagregaciones).
-            Cobertura: 1965-2024 (anual). Pie chart si se pide 1 año,
+            Cobertura: anual desde 1965. Pie chart si se pide 1 año,
             stacked bar si se piden varios.
             **ktep ≈ 11.63 GWh** - unidad estándar de balance energético.
 
@@ -303,7 +302,7 @@ def _register_ben_tools(mcp):  # noqa: C901
             en los últimos 5 años? ¿Cuál es el consumo total del último año?
             Devuelve serie de tiempo (gráfico de líneas) con todos los años
             del rango.
-            Cobertura: 1965-2024 (anual).
+            Cobertura: anual desde 1965.
             **No** computa per-cápita ni intensidad/PIB: BEN no incluye
             población ni PIB; cruzar con INE/BCU para esas métricas.
 
@@ -338,14 +337,14 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cómo cambió el mix energético residencial desde 1965?
             El TOTAL coincide con la columna 'Residencial' de
             `consumo_energetico_por_sector_uy` (misma magnitud, otra apertura).
-            Cobertura: 1965-2024 (anual). Pie chart si se pide 1 año, stacked
+            Cobertura: anual desde 1965. Pie chart si se pide 1 año, stacked
             bar si se piden varios. Devuelve mix del último año + % renovable,
             tabla año-por-año y gráfico. **ktep ≈ 11.63 GWh.**
 
         Args:
             anio_desde: Año inicial del rango (incluido). Default: 1965.
             anio_hasta: Año final del rango (incluido). Default: último año
-                disponible (típicamente 2024).
+                disponible.
 
         Examples:
             - consumo_residencial_por_fuente_uy()
@@ -370,7 +369,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Aumenta o baja el consumo residencial?
                 - ¿Cómo evolucionó desde 1965 / en la última década?
             Devuelve serie de tiempo (gráfico de líneas) del TOTAL del hogar.
-            Cobertura: 1965-2024 (anual).
+            Cobertura: anual desde 1965.
             **No** computa per-cápita ni por hogar: BEN no incluye población
             ni cantidad de hogares; cruzar con INE para esas métricas.
 
@@ -404,7 +403,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Qué participación tiene la solar térmica en el hogar?
             Devuelve un gráfico de líneas con la participación (%) de las
             principales fuentes del hogar año a año.
-            Cobertura: 1965-2024 (anual). Los valores son % del total del año,
+            Cobertura: anual desde 1965. Los valores son % del total del año,
             no ktep (para absolutos usar `consumo_residencial_por_fuente_uy`).
 
         Args:
@@ -437,7 +436,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cuándo dejó de usarse el queroseno en el hogar?
                 - ¿Cuándo apareció la solar térmica / la biomasa moderna?
                 - ¿En qué año fue máximo el consumo de una fuente?
-            Cobertura: 1965-2024 (anual). Devuelve gráfico de líneas de la
+            Cobertura: anual desde 1965. Devuelve gráfico de líneas de la
             fuente elegida.
 
         Args:
@@ -469,19 +468,18 @@ def _register_ben_tools(mcp):  # noqa: C901
             criterio del **Indicador ODS 7.2.1 del BEN** ('Proporción de la
             energía renovable en el consumo final total de energía'), año a año.
             A diferencia de un conteo de 'renovables directas', este criterio
-            **cuenta también la parte renovable de la electricidad**: como la
-            matriz del SIN es casi totalmente renovable, electrificar el hogar
-            sube el indicador. La electricidad se reparte en su fracción
-            renovable y fósil según el mix de generación del SIN de cada año,
-            por lo que la serie arranca en **2002** (primer año con mix del SIN).
+            **cuenta también la parte renovable de la electricidad**: la
+            electricidad se reparte en su fracción renovable y fósil según el
+            mix de generación del SIN de cada año, por lo que la serie arranca
+            en **2002** (primer año con mix del SIN).
             Útil para:
                 - ¿Qué tan renovable es la energía que usan los hogares?
                 - ¿Cómo evolucionó el % renovable del consumo residencial?
                 - ¿Cuánto aporta la electricidad limpia al renovable del hogar?
-            El 64% que publica el BEN para 2024 es el indicador NACIONAL (todos
-            los sectores); esta tool da el del sector residencial, más alto por
-            el peso de la electricidad y la leña.
-            Cobertura: 2002-2024 (anual). Devuelve gráfico de barras apiladas
+            No confundir con el indicador nacional que publica el BEN (todos
+            los sectores; ver `glosario_ben(concepto="renovable_consumo_final")`):
+            esta tool da sólo el del sector residencial.
+            Cobertura: anual desde 2002. Devuelve gráfico de barras apiladas
             (renovable vs no renovable) por año. **ktep ≈ 11.63 GWh.**
 
         Args:
@@ -514,7 +512,7 @@ def _register_ben_tools(mcp):  # noqa: C901
             renovable "sólo directo" (sin electricidad).
             Útil para:
                 - ¿Cómo se calcula el % renovable del hogar?
-                - ¿Por qué da X% y no el 64% nacional?
+                - ¿Por qué difiere del indicador nacional que publica el BEN?
                 - ¿Cuánto del renovable del hogar es leña y cuánto electricidad?
             Para años anteriores a 2002 (sin mix del SIN) sólo puede informar el
             renovable directo y lo aclara. Devuelve un pie chart con la
@@ -522,7 +520,7 @@ def _register_ben_tools(mcp):  # noqa: C901
             renovable del año.
 
         Args:
-            anio: Año a desglosar. Default: último año disponible (2024). El
+            anio: Año a desglosar. Default: último año disponible. El
                 criterio completo (con electricidad) requiere año >= 2002.
 
         Examples:
@@ -540,8 +538,7 @@ def _register_ben_tools(mcp):  # noqa: C901
             por fuente, en ktep.
             Muestra qué combustibles mueven el transporte: gasoil, gasolina
             automotora, biocombustibles (bioetanol, biodiésel), turbocombustible
-            y gasolina de aviación, fueloil (marítimo), y la incipiente
-            electricidad.
+            y gasolina de aviación, fueloil (marítimo) y electricidad.
             Útil para:
                 - ¿Con qué energía se mueve el transporte en Uruguay?
                 - ¿Cuánto pesan el gasoil y la gasolina?
@@ -549,7 +546,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cómo cambió el mix del transporte desde 1965?
             El TOTAL coincide con la columna 'Transporte' de
             `consumo_energetico_por_sector_uy` (misma magnitud, otra apertura).
-            Cobertura: 1965-2024 (anual). Pie chart si se pide 1 año, stacked
+            Cobertura: anual desde 1965. Pie chart si se pide 1 año, stacked
             bar si se piden varios. **ktep ≈ 11.63 GWh.**
 
         Args:
@@ -572,14 +569,13 @@ def _register_ben_tools(mcp):  # noqa: C901
         """Evolución del consumo energético TOTAL del sector transporte de
             Uruguay, en ktep/año.
             Vista macro del transporte: ¿consume más o menos energía que antes?
-            ¿cuánto creció? El transporte es de los sectores que más creció en
-            demanda.
+            ¿cuánto creció?
             Útil para:
                 - ¿Cuánta energía consume el transporte en Uruguay?
                 - ¿Aumenta o baja el consumo del transporte?
                 - ¿Cómo evolucionó desde 1965 / en la última década?
             Devuelve serie de tiempo (gráfico de líneas) del TOTAL del sector.
-            Cobertura: 1965-2024 (anual). BEN no incluye parque automotor ni
+            Cobertura: anual desde 1965. BEN no incluye parque automotor ni
             población; cruzar con otras fuentes para 'consumo por vehículo'.
 
         Args:
@@ -601,7 +597,7 @@ def _register_ben_tools(mcp):  # noqa: C901
     ) -> DataToolOutput:
         """Participación (%) de cada fuente en el consumo del transporte de
             Uruguay a lo largo del tiempo, con foco en la entrada de los
-            biocombustibles (2010) y el peso gasoil vs gasolina.
+            biocombustibles y el peso gasoil vs gasolina.
             A diferencia de `consumo_transporte_por_fuente_uy` (que da ktep
             absolutos), entrega porcentajes del total de cada año.
             Útil para:
@@ -610,7 +606,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cuándo el gasoil superó a la gasolina?
             Devuelve un gráfico de líneas con la participación (%) de las
             principales fuentes año a año.
-            Cobertura: 1965-2024 (anual). Los valores son % del total del año,
+            Cobertura: anual desde 1965. Los valores son % del total del año,
             no ktep (para absolutos usar `consumo_transporte_por_fuente_uy`).
 
         Args:
@@ -641,7 +637,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cómo evolucionó el gasoil / la gasolina / el biodiésel?
                 - ¿Cuándo entraron los biocombustibles y cuánto crecieron?
                 - ¿En qué año fue máximo el consumo de una fuente?
-            Cobertura: 1965-2024 (anual). Devuelve gráfico de líneas de la
+            Cobertura: anual desde 1965. Devuelve gráfico de líneas de la
             fuente elegida.
 
         Args:
@@ -672,16 +668,16 @@ def _register_ben_tools(mcp):  # noqa: C901
             Cuenta como renovable los biocombustibles (bioetanol, biodiésel) y
             la parte renovable de la electricidad consumida (repartida según el
             mix de generación del SIN de cada año). La serie arranca en **2002**
-            (primer año con mix del SIN); los biocombustibles entraron en 2010.
+            (primer año con mix del SIN).
             Útil para:
                 - ¿Qué tan renovable es la energía del transporte?
                 - ¿Cómo evolucionó el % renovable del transporte?
                 - ¿Por qué el transporte es el sector más difícil de
                   descarbonizar?
-            El transporte es el sector más fósil: el % renovable es bajo aun con
-            este criterio. El 64% que publica el BEN para 2024 es el indicador
-            NACIONAL (todos los sectores), no el del transporte.
-            Cobertura: 2002-2024 (anual). Devuelve gráfico de barras apiladas
+            No confundir con el indicador nacional que publica el BEN (todos
+            los sectores; ver `glosario_ben(concepto="renovable_consumo_final")`):
+            esta tool da sólo el del sector transporte.
+            Cobertura: anual desde 2002. Devuelve gráfico de barras apiladas
             (renovable vs no renovable). **ktep ≈ 11.63 GWh.**
 
         Args:
@@ -717,7 +713,7 @@ def _register_ben_tools(mcp):  # noqa: C901
             composición del año.
 
         Args:
-            anio: Año a desglosar. Default: último año disponible (2024). El
+            anio: Año a desglosar. Default: último año disponible. El
                 criterio completo (con electricidad) requiere año >= 2002.
 
         Examples:
@@ -742,7 +738,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿% renovable vs no renovable de la oferta primaria?
                 - ¿Cómo evolucionó la participación renovable?
                 - Diversificación (índice de Herfindahl normalizado).
-            Cobertura: 1965-2024 (anual). Pie chart si 1 año, stacked bar si
+            Cobertura: anual desde 1965. Pie chart si 1 año, stacked bar si
             varios.
             **ktep ≈ 11.63 GWh.** Para sólo el sub-sistema eléctrico ver
             `matriz_generacion_electrica_uy`.
@@ -774,8 +770,8 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cuál es el nivel de dependencia energética del país?
                 - ¿Cómo evolucionó la dependencia con la entrada de
                   renovables locales?
-            Cobertura: 1965-2024. Pie chart (importado vs local) si se pide
-            1 año; stacked bar evolutivo si se piden varios años.
+            Cobertura: anual desde 1965. Pie chart (importado vs local) si se
+            pide 1 año; stacked bar evolutivo si se piden varios años.
 
         Args:
             anio_desde: Año inicial del rango (incluido). Default: 1965.
@@ -805,7 +801,7 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Qué pérdidas tiene el sistema en transformación y
                   distribución?
                 - ¿Cómo evolucionó la eficiencia agregada del sistema?
-            Cobertura: 1965-2024. Cruza dos datasets: abastecimiento +
+            Cobertura: anual desde 1965. Cruza dos datasets: abastecimiento +
             consumo final por fuente.
 
         Args:
@@ -833,8 +829,8 @@ def _register_ben_tools(mcp):  # noqa: C901
                 - ¿Cómo evolucionaron las importaciones de petróleo?
                 - Vulnerabilidad ante shocks del precio del petróleo (input
                   clave).
-            Cobertura: 1965-2024. Devuelve gráfico de líneas (varios años) o
-            barras (un único año).
+            Cobertura: anual desde 1965. Devuelve gráfico de líneas (varios
+            años) o barras (un único año).
 
         Args:
             anio_desde: Año inicial del rango (incluido). Default: 1965.
@@ -854,14 +850,13 @@ def _register_ben_tools(mcp):  # noqa: C901
         anio_desde: int | None = None, anio_hasta: int | None = None
     ) -> DataToolOutput:
         """Serie anual de importaciones de gas natural a Uruguay, en ktep.
-            Volúmenes modestos comparados con petróleo y biomasa. La serie
-            tiene datos desde 1998 (años previos vacíos).
+            La serie tiene datos desde 1998 (años previos vacíos).
             Útil para:
                 - ¿Cuánto gas natural importa Uruguay?
                 - ¿Cómo evolucionaron las importaciones de gas?
                 - Peso del gas natural en la matriz primaria (combinar con
                   `matriz_energetica_primaria_uy`).
-            Cobertura útil: 1998-2024 (años pre-1998 vacíos).
+            Cobertura útil: anual desde 1998.
 
         Args:
             anio_desde: Año inicial del rango (incluido). Default: 1998.
@@ -883,14 +878,12 @@ def _register_ben_tools(mcp):  # noqa: C901
         """Intercambio eléctrico de Uruguay - importación, exportación y
             saldo neto, en ktep.
             Las dos columnas son **magnitudes positivas** (no usar signo):
-            el saldo neto se calcula como exportación menos importación. La
-            serie muestra el paso de una posición importadora a una
-            exportadora neta en varios años de la última década.
+            el saldo neto se calcula como exportación menos importación.
             Útil para:
                 - ¿Uruguay importa o exporta electricidad?
                 - ¿Cómo evolucionó la posición exportadora del país?
                 - ¿En qué años fue exportador / importador neto?
-            Cobertura: 1965-2024 (anual). Devuelve gráfico de barras
+            Cobertura: anual desde 1965. Devuelve gráfico de barras
             agrupadas (impo vs expo) por año.
 
         Args:
@@ -918,9 +911,10 @@ def _register_ben_tools(mcp):  # noqa: C901
             Útil para:
                 - ¿Qué sectores son los grandes emisores?
                 - ¿Cómo evolucionaron las emisiones por sector?
-                - 'Termómetro' de la transición: caída de CE_SP con la
-                  entrada de renovables.
-            Cobertura: 1965-2024. Pie chart si 1 año, stacked bar si varios.
+                - Seguimiento de la transición: evolución de las emisiones
+                  de las centrales eléctricas (CE_SP).
+            Cobertura: anual desde 1965. Pie chart si 1 año, stacked bar si
+            varios.
             Notas IPCC: las partidas Q_B (quema de biomasa) y BI (búnker
             internacional) son **informativas**, no se suman al inventario
             nacional. Sólo CO2 (no CH4/N2O) y sólo combustión (no procesos
