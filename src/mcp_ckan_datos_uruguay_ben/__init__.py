@@ -29,6 +29,7 @@ def _register_ben_tools(mcp):  # noqa: C901
     pregunta → fuente en `datasets/BEN/data/INDEX.md`.
     """
     mcp.set_plugin_info(
+        display_name="Explore Uruguay Energy Data",
         description=(
             "Herramientas sobre datos abiertos del Uruguay (catalogodatos.gub.uy). "
         ),
