@@ -3,12 +3,12 @@
 **Página del dataset:** https://catalogodatos.gub.uy/dataset/ministerio-de-industria-energia-y-mineria-ben-consumo-sector-transporte-por-fuente
 **CSV directo:** https://catalogodatos.gub.uy/dataset/88219cac-31cb-4b62-a4b0-786d18072a9c/resource/1a4de650-9eb9-47e4-9339-df0da15adca0/download/consumo-sector-transporte-por-fuente.csv
 **Archivo local:** `consumo-sector-transporte-por-fuente.csv` · **Metadata:** `metadatos_consumo-sector-transporte-por-fuente.json`
-**Encoding:** UTF-8 · **Separador:** `,` · **Decimal:** `,` · **Cobertura:** 1965-2024 (anual, 60 años) · **Filas de datos:** 60
+**Encoding:** ISO-8859-1 · **Separador:** `;` · **Decimal:** `.` · **Cobertura:** 1965-2025 (anual, 61 años) · **Filas de datos:** 61
 
 ```python
 import pandas as pd
 URL = "https://catalogodatos.gub.uy/dataset/88219cac-31cb-4b62-a4b0-786d18072a9c/resource/1a4de650-9eb9-47e4-9339-df0da15adca0/download/consumo-sector-transporte-por-fuente.csv"
-df = pd.read_csv(URL, decimal=",", encoding="utf-8")
+df = pd.read_csv(URL, sep=";", encoding="latin-1")
 ```
 
 ## Descripción
@@ -35,7 +35,9 @@ gasoil y la gasolina automotora explican casi todo el consumo.
 | `TOTAL` | ktep | Consumo final energético total del sector transporte |
 
 Una celda vacía significa que no hay dato (la fuente no se consumía en el
-transporte ese año). Los valores usan **coma decimal** (`260,5` = 260.5).
+transporte ese año). **Actualización (2026-02):** el MIEM migró este CSV al formato
+estándar del resto de los datasets BEN: ISO-8859-1, separador `;` y **punto
+decimal**, y agregó la columna `GM` (gas manufacturado, aún sin datos).
 
 ## Head (primeras 10 líneas)
 ```
@@ -78,9 +80,9 @@ aviación 2.0.
 - El `TOTAL` coincide con la columna `T` (transporte) de
   `miem-consumo-final-energetico-por-sector` (cross-check: 2024 ambos =
   1492.6) - es la misma magnitud desagregada por fuente en vez de por sector.
-- A diferencia de los demas datasets BEN (ISO-8859-1, separador `;`), este CSV
-  viene en **UTF-8 con separador `,` y coma decimal**; usar `decimal=","` al
-  leerlo.
+- Formato migrado (2026-02) al estándar de los demás datasets BEN: **ISO-8859-1,
+  separador `;` y punto decimal** (antes UTF-8 / `,` / coma decimal). La columna
+  `GM` (gas manufacturado) se agregó al header pero todavía no tiene datos.
 - `Q` (queroseno) es historico de aviacion hasta 1979; a partir de 1980 se
   reemplaza por `T` (turbocombustible). `Do` (dieseloil) tambien es mayormente
   historico.
