@@ -5,6 +5,8 @@ URLs de los 10 datasets (página del portal CKAN + CSV directo), loader
 cacheado (`load_dataset`) que normaliza la columna AÑO → anio, y `filter_years`.
 """
 import io
+import time
+
 import requests
 
 import pandas as pd
@@ -99,17 +101,45 @@ DATASET_URLS = {
     for key, (ds, rs, fn) in _DATASET_PARTS.items()
 }
 
-# Opciones de parseo por dataset. Casi todos los CSV del MIEM vienen en
-# ISO-8859-1 con separador ';' y punto decimal (`_DEFAULT_READ_OPTS`). El
-# dataset residencial, publicado más tarde, viene en UTF-8 con separador ','
-# y **coma decimal** ("296,5" = 296.5), así que necesita su propia entrada.
+# Opciones de parseo por dataset. Todos los CSV del MIEM vienen en
+# ISO-8859-1 con separador ';' y punto decimal.
+#
+# NOTA (2026-02): los datasets `consumo_residencial` y `consumo_transporte`
+# se publicaron originalmente en UTF-8 con separador ',' y coma decimal, pero
+# el MIEM los migró al formato estándar del resto de los datasets (';',
+# ISO-8859-1, punto decimal; el transporte ganó además una columna `GM` -gas
+# manufacturado- aún vacía). Con las opciones viejas pandas leía todo el
+# renglón como UNA sola columna y `load_dataset` fallaba con KeyError 'anio'.
 _DEFAULT_READ_OPTS = {"sep": ";", "encoding": "latin-1"}
-_DATASET_READ_OPTS = {
-    "consumo_residencial": {"sep": ",", "encoding": "utf-8", "decimal": ","},
-    "consumo_transporte": {"sep": ",", "encoding": "utf-8", "decimal": ","},
-}
+_DATASET_READ_OPTS = {}
 
 _caches = {}
+
+
+def _fetch(url, encoding, attempts=3, timeout=30):
+    """GET con reintentos y chequeo de status.
+
+    El catálogo devuelve a ratos 503 con una página HTML de mantenimiento;
+    sin esto, ese HTML llegaría a `pd.read_csv` y las tools fallarían con
+    ParserError/KeyError confusos en lugar de un error claro de red.
+    """
+    last_exc = None
+    for i in range(attempts):
+        try:
+            response = requests.get(url, verify=False, timeout=timeout)
+            response.raise_for_status()
+            # Forzamos el encoding: sin charset en la cabecera, requests
+            # asume ISO-8859-1 y rompería los acentos de un CSV UTF-8.
+            response.encoding = encoding
+            return response
+        except (requests.RequestException,) as exc:
+            last_exc = exc
+            if i < attempts - 1:
+                time.sleep(2 ** i)  # backoff: 1s, 2s, ...
+    raise requests.RequestException(
+        f"No se pudo descargar {url} tras {attempts} intentos "
+        f"(catálogo caído o lento): {last_exc}"
+    ) from last_exc
 
 
 def load_dataset(key):
@@ -125,19 +155,29 @@ def load_dataset(key):
         return _caches[key]
     url = DATASET_URLS[key]
     opts = _DATASET_READ_OPTS.get(key, _DEFAULT_READ_OPTS)
-
     # El 09 de Junio, el catálogo se desplegó con un Self-Signed certificate y
     # las llamadas programáticas ya no funcionan. Como controlamos las URLs que
     # se llaman y confiamos en el servidor, esquivamos la validación SSL.
     # TODO: Hablar con el equipo de infraestructura y revisar este fix que ponemos
     # para poder desplegar en el entorno de pruebas.
-    response = requests.get(url, verify=False)
-    # Forzamos el encoding: sin charset en la cabecera, requests asume
-    # ISO-8859-1 y rompería los acentos del dataset residencial (UTF-8).
-    response.encoding = opts["encoding"]
+    response = _fetch(url, opts["encoding"])
     df = pd.read_csv(io.StringIO(response.text), **opts)
-    if "AÑO" in df.columns:
-        df = df.rename(columns={"AÑO": "anio"})
+    # Normaliza la columna de año a `anio`, tolerando variantes del header
+    # (BOM UTF-8, espacios, 'Año' con minúsculas) por si el publicador vuelve
+    # a cambiar el formato del CSV.
+    year_col = next(
+        (c for c in df.columns
+         if str(c).lstrip("\ufeff").strip().upper() == "AÑO"),
+        None,
+    )
+    if year_col is not None:
+        df = df.rename(columns={year_col: "anio"})
+    if "anio" not in df.columns:
+        raise ValueError(
+            f"El CSV de '{key}' no tiene la columna de año esperada "
+            f"(columnas recibidas: {list(df.columns)}). ¿Cambió el formato "
+            "del dataset en el catálogo?"
+        )
     df["anio"] = df["anio"].astype(int)
     _caches[key] = df
     return df

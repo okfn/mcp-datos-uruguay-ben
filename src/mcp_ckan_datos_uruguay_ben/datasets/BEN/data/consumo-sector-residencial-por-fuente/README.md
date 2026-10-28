@@ -3,12 +3,12 @@
 **Página del dataset:** https://catalogodatos.gub.uy/dataset/ministerio-industra-energia-mineria-ben-consumo-sector-residencial-por-fuente
 **CSV directo:** https://catalogodatos.gub.uy/dataset/f36babe7-c21e-4ad5-b94e-f525ed393fbe/resource/a7318ff7-16da-498b-a475-a810e7ace162/download/consumo-sector-residencial-por-fuente.csv
 **Archivo local:** `consumo-sector-residencial-por-fuente.csv` · **Metadata:** `metadatos_consumo-sector-residencial-por-fuente.json`
-**Encoding:** UTF-8 · **Separador:** `,` · **Decimal:** `,` · **Cobertura:** 1965-2024 (anual, 60 años) · **Filas de datos:** 60
+**Encoding:** ISO-8859-1 · **Separador:** `;` · **Decimal:** `.` · **Cobertura:** 1965-2025 (anual, 61 años)
 
 ```python
 import pandas as pd
 URL = "https://catalogodatos.gub.uy/dataset/f36babe7-c21e-4ad5-b94e-f525ed393fbe/resource/a7318ff7-16da-498b-a475-a810e7ace162/download/consumo-sector-residencial-por-fuente.csv"
-df = pd.read_csv(URL, decimal=",", encoding="utf-8")
+df = pd.read_csv(URL, sep=";", encoding="latin-1")
 ```
 
 ## Descripción
@@ -39,7 +39,9 @@ abastecen al hogar (leña, electricidad, supergás, etc.).
 | `TOTAL` | ktep | Consumo final energético total del sector residencial |
 
 Una celda vacía significa que no hay dato (la fuente no se consumía en el
-residencial ese año). Los valores usan **coma decimal** (`296,5` = 296.5).
+residencial ese año). **Actualización (2026-02):** el MIEM migró este CSV al
+formato estándar del resto de los datasets BEN: ISO-8859-1, separador `;` y
+**punto decimal**.
 
 ## Head (primeras 10 líneas)
 ```
@@ -88,6 +90,6 @@ supergás (GLP) 106.0, gas natural 19.4, residuos de biomasa 7.6, solar 6.6.
 - El `TOTAL` coincide con la columna `R` (residencial) de
   `miem-consumo-final-energetico-por-sector` (cross-check: 2024 ambos =
   864.1) - es la misma magnitud desagregada por fuente en vez de por sector.
-- A diferencia de los demás datasets BEN (ISO-8859-1, separador `;`), este
-  CSV viene en **UTF-8 con separador `,` y coma decimal**; usar
-  `decimal=","` al leerlo.
+- Formato migrado (2026-02) al estándar de los demás datasets BEN:
+  **ISO-8859-1, separador `;` y punto decimal** (antes UTF-8 / `,` / coma
+  decimal).
